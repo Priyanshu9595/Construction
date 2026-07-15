@@ -13,10 +13,7 @@ export default function PublicNavbar() {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/#features" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider">Features</Link>
-          <Link to="/#solutions" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider">Modules</Link>
-          <Link to="/#pricing" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider">Pricing</Link>
-          <Link to="/#contact" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wider">Contact</Link>
+          {/* Links removed as per user request */}
         </div>
 
         {/* Auth Buttons */}
