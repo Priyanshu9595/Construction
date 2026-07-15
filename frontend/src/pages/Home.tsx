@@ -47,33 +47,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto mt-20 relative animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
            <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent z-10"></div>
            <div className="rounded-2xl border border-slate-200/60 shadow-2xl overflow-hidden bg-white">
-              {/* CSS Mock Dashboard instead of Image */}
-              <div className="w-full h-[500px] bg-slate-50 flex flex-col">
-                <div className="h-12 border-b border-slate-200 bg-white flex items-center px-4 gap-2">
-                  <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                  <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                  <div className="w-3 h-3 rounded-full bg-slate-200"></div>
-                  <div className="ml-4 w-64 h-6 bg-slate-100 rounded-md"></div>
-                </div>
-                <div className="flex-1 p-8 flex gap-6">
-                  <div className="hidden md:block w-64 bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-4">
-                    <div className="w-full h-8 bg-slate-100 rounded"></div>
-                    <div className="w-3/4 h-8 bg-slate-100 rounded"></div>
-                    <div className="w-full h-8 bg-slate-100 rounded"></div>
-                    <div className="w-5/6 h-8 bg-slate-100 rounded"></div>
-                  </div>
-                  <div className="flex-1 flex flex-col gap-6">
-                    <div className="h-32 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex gap-4">
-                       <div className="flex-1 h-full bg-blue-50/50 border border-blue-100 rounded-lg"></div>
-                       <div className="flex-1 h-full bg-emerald-50/50 border border-emerald-100 rounded-lg"></div>
-                       <div className="flex-1 h-full bg-orange-50/50 border border-orange-100 rounded-lg"></div>
-                    </div>
-                    <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                       <div className="w-full h-full bg-slate-50 rounded-lg border border-slate-100 border-dashed"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <img 
+                src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=2000" 
+                alt="Construction Management Dashboard" 
+                className="w-full h-[500px] object-cover" 
+              />
            </div>
         </div>
       </section>
