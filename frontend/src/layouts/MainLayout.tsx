@@ -55,37 +55,37 @@ export default function MainLayout() {
     }
 
     if (userRole === "project_owner" || userRole === "project_manager") {
-      const projectIdMatch = location.pathname.match(/\/projects\/([a-zA-Z0-9_-]+)/);
+      const projectIdMatch = location.pathname.match(/\/project-owner\/([a-zA-Z0-9_-]+)/);
       const projectId = projectIdMatch && projectIdMatch[1] !== 'dashboard' ? projectIdMatch[1] : null;
 
       if (!projectId) {
-        return [{ name: "Dashboard", path: "/projects/dashboard", icon: <LayoutDashboard size={20} /> }];
+        return [{ name: "Dashboard", path: "/project-owner/dashboard", icon: <LayoutDashboard size={20} /> }];
       }
 
       const items = [
-        { name: "Project Dashboard", path: `/projects/${projectId}/dashboard`, icon: <LayoutDashboard size={20} /> },
-        { name: "Phases", path: `/projects/${projectId}/phases`, icon: <Layers size={20} /> },
-        { name: "Tasks", path: `/projects/${projectId}/tasks`, icon: <ListTodo size={20} /> },
-        { name: "Workers", path: `/projects/${projectId}/workers`, icon: <Users size={20} /> },
-        { name: "BOQ", path: `/projects/${projectId}/boq`, icon: <FileSpreadsheet size={20} /> },
-        { name: "Budget", path: `/projects/${projectId}/budget`, icon: <Wallet size={20} /> },
-        { name: "Site Execution", path: `/projects/${projectId}/sites`, icon: <HardHat size={20} /> },
+        { name: "Project Dashboard", path: `/project-owner/${projectId}/dashboard`, icon: <LayoutDashboard size={20} /> },
+        { name: "Phases", path: `/project-owner/${projectId}/phases`, icon: <Layers size={20} /> },
+        { name: "Tasks", path: `/project-owner/${projectId}/tasks`, icon: <ListTodo size={20} /> },
+        { name: "Workers", path: `/project-owner/${projectId}/workers`, icon: <Users size={20} /> },
+        { name: "BOQ", path: `/project-owner/${projectId}/boq`, icon: <FileSpreadsheet size={20} /> },
+        { name: "Budget", path: `/project-owner/${projectId}/budget`, icon: <Wallet size={20} /> },
+        { name: "Site Execution", path: `/project-owner/${projectId}/sites`, icon: <HardHat size={20} /> },
       ];
 
       if (userPermissions.includes("finance.manage") || userPermissions.includes("finance.view")) {
-        items.push({ name: "Finance", path: `/projects/${projectId}/finance/expenses`, icon: <Wallet size={20} /> });
+        items.push({ name: "Finance", path: `/project-owner/${projectId}/finance/expenses`, icon: <Wallet size={20} /> });
       }
       if (userPermissions.includes("purchase.manage")) {
-        items.push({ name: "Purchase", path: `/projects/${projectId}/purchase/orders`, icon: <ShoppingCart size={20} /> });
+        items.push({ name: "Purchase", path: `/project-owner/${projectId}/purchase/orders`, icon: <ShoppingCart size={20} /> });
       }
       if (userPermissions.includes("inventory.manage")) {
-        items.push({ name: "Store Inventory", path: `/projects/${projectId}/store/inventory`, icon: <Building2 size={20} /> });
+        items.push({ name: "Store Inventory", path: `/project-owner/${projectId}/store/inventory`, icon: <Building2 size={20} /> });
       }
       if (userPermissions.includes("quality.manage")) {
-        items.push({ name: "Quality", path: `/projects/${projectId}/quality/inspections`, icon: <ClipboardCheck size={20} /> });
+        items.push({ name: "Quality", path: `/project-owner/${projectId}/quality/inspections`, icon: <ClipboardCheck size={20} /> });
       }
       if (userPermissions.includes("safety.manage")) {
-        items.push({ name: "Safety", path: `/projects/${projectId}/safety/incidents`, icon: <AlertTriangle size={20} /> });
+        items.push({ name: "Safety", path: `/project-owner/${projectId}/safety/incidents`, icon: <AlertTriangle size={20} /> });
       }
       
       return items;

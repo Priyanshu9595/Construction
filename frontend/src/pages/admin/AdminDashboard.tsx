@@ -21,6 +21,9 @@ import {
   Ticket,
   Trash2,
   Users,
+  TrendingDown,
+  TrendingUp,
+  WalletCards,
 } from "lucide-react";
 import {
   Area,
@@ -61,6 +64,7 @@ type DashboardData = {
     ownerLastName: string;
     ownerEmail: string;
     plan: string;
+    planId?: string;
     users: number;
     projects: number;
     joinedDate: string;
@@ -70,6 +74,7 @@ type DashboardData = {
   subscriptionOverview: {
     plans: Array<{ plan: string; companies: number; monthlyRevenue: number }>;
     totalMonthlyRevenue: number;
+    totalMonthlyExpenses: number;
     annualRecurringRevenue: number;
     revenueGrowth: number;
   };
@@ -78,10 +83,32 @@ type DashboardData = {
   performance: {
     platformUptime: number;
     monthlyRevenue: number;
+    monthlyExpenses: number;
+    netProfit: number;
     revenueGrowth: number;
     activeSupportTickets: number;
     criticalSupportTickets: number;
   };
+  financials: {
+    revenue: number;
+    expenses: number;
+    netProfit: number;
+    recentExpenses: Array<{ id: string; title: string; amount: number; category: string; date: string; }>;
+  };
+};
+
+type ExpenseFormState = {
+  title: string;
+  category: string;
+  amount: number;
+  description: string;
+};
+
+const emptyExpenseForm: ExpenseFormState = {
+  title: "",
+  category: "Other",
+  amount: 0,
+  description: "",
 };
 
 type CompanyFormState = {
@@ -95,6 +122,7 @@ type CompanyFormState = {
   ownerLastName: string;
   ownerEmail: string;
   ownerPassword: string;
+  planId: string;
 };
 
 const emptyCompanyForm: CompanyFormState = {
@@ -107,12 +135,14 @@ const emptyCompanyForm: CompanyFormState = {
   ownerLastName: "",
   ownerEmail: "",
   ownerPassword: "123456",
+  planId: "",
 };
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [companyModal, setCompanyModal] = useState<CompanyFormState | null>(null);
+  const [expenseModal, setExpenseModal] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<DashboardData["recentCompanies"][number] | null>(null);
   const [dateFilter, setDateFilter] = useState("Last 30 Days");
   const { data, isLoading, isError, error } = useQuery({
@@ -123,6 +153,14 @@ export default function AdminDashboard() {
     mutationFn: (form: CompanyFormState) => saveCompanyRequest(form),
     onSuccess: () => {
       setCompanyModal(null);
+      queryClient.invalidateQueries({ queryKey: ["super-admin-dashboard"] });
+    },
+  });
+
+  const saveExpense = useMutation({
+    mutationFn: (form: ExpenseFormState) => saveExpenseRequest(form),
+    onSuccess: () => {
+      setExpenseModal(false);
       queryClient.invalidateQueries({ queryKey: ["super-admin-dashboard"] });
     },
   });
@@ -172,18 +210,19 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <section className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">Super Admin Dashboard</h1>
-          <p className="mt-1 text-sm font-medium text-slate-500">Monitor and manage the complete BuildFlow platform</p>
+    <div className="space-y-8 pb-10">
+      <section className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="relative">
+          <div className="absolute -left-4 top-0 h-full w-1.5 rounded-r-lg bg-gradient-to-b from-blue-600 to-indigo-600"></div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600">Super Admin Workspace</h1>
+          <p className="mt-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">Monitor and manage the complete BuildFlow platform</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="inline-flex items-center gap-2 rounded-xl border border-white/60 bg-white/60 backdrop-blur-xl px-4 py-2.5 text-sm font-bold text-slate-700 shadow-lg shadow-slate-200/40 hover:shadow-xl transition-all">
             <select
               value={dateFilter}
               onChange={(event) => setDateFilter(event.target.value)}
-              className="bg-transparent outline-none"
+              className="bg-transparent outline-none cursor-pointer"
               aria-label="Date filter"
             >
               <option>Last 7 Days</option>
@@ -191,45 +230,53 @@ export default function AdminDashboard() {
               <option>This Month</option>
               <option>This Year</option>
             </select>
-            <ChevronDown size={16} />
-          </button>
+            <ChevronDown size={16} className="text-slate-400" />
+          </div>
           <button
             onClick={() => exportDashboardCsv(data)}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/60 bg-white/60 backdrop-blur-xl px-4 py-2.5 text-sm font-bold text-slate-700 shadow-lg shadow-slate-200/40 hover:shadow-xl hover:-translate-y-0.5 transition-all"
           >
-            <Download size={16} /> Export Report
+            <Download size={16} className="text-blue-600" /> Export Report
           </button>
           <button
             onClick={() => setCompanyModal(emptyCompanyForm)}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-xl shadow-blue-600/30 hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all"
           >
             <Plus size={17} /> Add Company
           </button>
         </div>
       </section>
 
-      <section className="grid grid-cols-4 gap-4">
+      <section className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-75">
+        <PerformanceCards performance={data.performance} />
+      </section>
+
+      <section className="grid grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between">
+            <div key={card.label} className="group relative overflow-hidden rounded-3xl border border-white/60 bg-white/60 p-6 shadow-xl shadow-slate-200/40 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-200/40 hover:bg-white/80">
+              <div className={`absolute -right-6 -top-6 h-32 w-32 rounded-full ${card.bg} opacity-50 blur-3xl transition-all duration-500 group-hover:scale-150`}></div>
+              <div className="relative z-10 flex items-start justify-between">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{card.label}</p>
-                  <p className="mt-3 text-3xl font-extrabold text-slate-950">{card.value.toLocaleString("en-IN")}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{card.label}</p>
+                  <p className="mt-3 text-4xl font-black tracking-tight text-slate-900">{card.value.toLocaleString("en-IN")}</p>
                 </div>
-                <span className={`flex h-11 w-11 items-center justify-center rounded-lg ${card.bg} ${card.color}`}>
-                  <Icon size={21} />
+                <span className={`flex h-14 w-14 items-center justify-center rounded-2xl ${card.bg} ${card.color} shadow-inner`}>
+                  <Icon size={26} strokeWidth={2.5} />
                 </span>
               </div>
-              <p className={`mt-4 text-sm font-bold ${card.color}`}>{card.meta}</p>
+              <p className={`relative z-10 mt-5 flex items-center gap-1.5 text-sm font-bold ${card.color}`}>
+                <div className={`h-1.5 w-1.5 rounded-full bg-current`} />
+                {card.meta}
+              </p>
             </div>
           );
         })}
       </section>
 
-      <section className="grid grid-cols-[1fr_390px] gap-5">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="grid grid-cols-[1fr_390px] gap-6 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-200">
+        <div className="rounded-3xl border border-white/60 bg-white/60 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl transition-all hover:bg-white/80">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-lg font-extrabold text-slate-950">Platform Growth</h2>
             <div className="flex rounded-lg bg-slate-100 p-1">
@@ -255,7 +302,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-3xl border border-white/60 bg-white/60 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl transition-all hover:bg-white/80">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-lg font-extrabold text-slate-950">Companies by Plan</h2>
             <button onClick={() => navigate("/super-owner/plans")} className="text-sm font-bold text-blue-600">View Plans</button>
@@ -286,7 +333,7 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      <section className="grid grid-cols-[1fr_360px] gap-5">
+      <section className="grid grid-cols-[1fr_360px] gap-6 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-300">
         <RecentCompaniesTable
           companies={data.recentCompanies}
           onView={setSelectedCompany}
@@ -302,6 +349,7 @@ export default function AdminDashboard() {
             ownerLastName: company.ownerLastName,
             ownerEmail: company.ownerEmail,
             ownerPassword: "",
+            planId: company.planId || "",
           })}
         />
         <div className="space-y-5">
@@ -309,6 +357,7 @@ export default function AdminDashboard() {
           <QuickActions onAction={(action) => {
             if (action === "Add New Company") setCompanyModal(emptyCompanyForm);
             if (action === "Create Subscription Plan") navigate("/super-owner/plans");
+            if (action === "Add Platform Expense") setExpenseModal(true);
             if (action === "Manage Users") navigate("/super-owner/users");
             if (action === "Send Announcement") navigate("/super-owner/announcements");
             if (action === "View Support Tickets") navigate("/super-owner/support");
@@ -317,18 +366,26 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      <section className="grid grid-cols-3 gap-5">
+      <section className="grid grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-16 duration-700 delay-500 pb-12">
         <RecentActivity activities={data.recentActivity} />
         <AttentionAlerts alerts={data.alerts} />
-        <PerformanceCards performance={data.performance} />
       </section>
       {companyModal ? (
         <CompanyModal
           form={companyModal}
           isSaving={saveCompany.isPending}
           error={saveCompany.error instanceof Error ? saveCompany.error.message : ""}
+          plans={data.companiesByPlan.filter((p) => p.id !== "unassigned")}
           onClose={() => setCompanyModal(null)}
           onSubmit={(form) => saveCompany.mutate(form)}
+        />
+      ) : null}
+      {expenseModal ? (
+        <ExpenseModal
+          isSaving={saveExpense.isPending}
+          error={saveExpense.error instanceof Error ? saveExpense.error.message : ""}
+          onClose={() => setExpenseModal(false)}
+          onSubmit={(form) => saveExpense.mutate(form)}
         />
       ) : null}
       {selectedCompany ? (
@@ -370,6 +427,23 @@ async function saveCompanyRequest(form: CompanyFormState) {
   return data;
 }
 
+async function saveExpenseRequest(form: ExpenseFormState) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_BASE_URL}/api/admin/expenses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(form),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || data.error || "Unable to save expense");
+  }
+  return data;
+}
+
 function RecentCompaniesTable({
   companies,
   onView,
@@ -397,8 +471,8 @@ function RecentCompaniesTable({
   });
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 p-5">
+    <div className="rounded-3xl border border-white/60 bg-white/60 shadow-xl shadow-slate-200/40 backdrop-blur-xl overflow-hidden">
+      <div className="flex items-center justify-between border-b border-white/40 bg-white/40 p-6">
         <div>
           <h2 className="text-lg font-extrabold text-slate-950">Recent Companies</h2>
           <a href="/super-owner/companies" className="mt-1 inline-block text-sm font-bold text-blue-600">View All Companies</a>
@@ -475,7 +549,7 @@ function RecentCompaniesTable({
 
 function SubscriptionOverview({ data }: { data: DashboardData["subscriptionOverview"] }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-white/60 bg-white/60 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl hover:bg-white/80 transition-all">
       <h2 className="text-lg font-extrabold text-slate-950">Subscription Overview</h2>
       <EmptyAwareList isEmpty={!data.plans.length} message="No subscriptions found.">
         <div className="mt-4 space-y-3">
@@ -500,6 +574,7 @@ function SubscriptionOverview({ data }: { data: DashboardData["subscriptionOverv
 function QuickActions({ onAction }: { onAction: (label: string) => void }) {
   const actions = [
     [Plus, "Add New Company"],
+    [TrendingDown, "Add Platform Expense"],
     [Settings, "Create Subscription Plan"],
     [Users, "Manage Users"],
     [Megaphone, "Send Announcement"],
@@ -508,11 +583,11 @@ function QuickActions({ onAction }: { onAction: (label: string) => void }) {
   ] as const;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-white/60 bg-white/60 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl hover:bg-white/80 transition-all">
       <h2 className="text-lg font-extrabold text-slate-950">Quick Actions</h2>
       <div className="mt-4 grid grid-cols-2 gap-2">
         {actions.map(([ActionIcon, label]) => (
-          <button key={label} onClick={() => onAction(label)} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-extrabold text-slate-700">
+          <button key={label} onClick={() => onAction(label)} className="flex items-center gap-3 rounded-xl border border-white/80 bg-white/50 px-4 py-3 text-left text-xs font-extrabold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md hover:bg-white transition-all">
             <ActionIcon size={15} />{label}
           </button>
         ))}
@@ -525,12 +600,14 @@ function CompanyModal({
   form,
   isSaving,
   error,
+  plans,
   onClose,
   onSubmit,
 }: {
   form: CompanyFormState;
   isSaving: boolean;
   error: string;
+  plans: Array<{ id: string; name: string }>;
   onClose: () => void;
   onSubmit: (form: CompanyFormState) => void;
 }) {
@@ -574,6 +651,18 @@ function CompanyModal({
                       <option value="pending">Pending Onboarding</option>
                       <option value="active">Active</option>
                       <option value="blocked">Blocked / Suspended</option>
+                    </select>
+                    <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
+                </label>
+                <label className="text-sm font-bold text-slate-700">
+                  Subscription Plan
+                  <div className="relative mt-1.5">
+                    <select value={draft.planId} onChange={(event) => setDraft({ ...draft, planId: event.target.value })} className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                      <option value="">Unassigned</option>
+                      {plans.map((plan) => (
+                        <option key={plan.id} value={plan.id}>{plan.name}</option>
+                      ))}
                     </select>
                     <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   </div>
@@ -707,7 +796,7 @@ function exportDashboardCsv(data: DashboardData) {
 
 function RecentActivity({ activities }: { activities: DashboardData["recentActivity"] }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-white/60 bg-white/60 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl hover:bg-white/80 transition-all">
       <h2 className="text-lg font-extrabold text-slate-950">Recent Platform Activity</h2>
       <EmptyAwareList isEmpty={!activities.length} message="No platform activity yet.">
         <div className="mt-4 space-y-4">
@@ -725,7 +814,7 @@ function RecentActivity({ activities }: { activities: DashboardData["recentActiv
 
 function AttentionAlerts({ alerts }: { alerts: DashboardData["alerts"] }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl border border-white/60 bg-white/60 p-7 shadow-xl shadow-slate-200/40 backdrop-blur-xl hover:bg-white/80 transition-all">
       <h2 className="text-lg font-extrabold text-slate-950">Requires Attention</h2>
       <div className="mt-4 space-y-3">
         {alerts.map((alert) => {
@@ -745,14 +834,16 @@ function AttentionAlerts({ alerts }: { alerts: DashboardData["alerts"] }) {
 function PerformanceCards({ performance }: { performance: DashboardData["performance"] }) {
   const cards = [
     ["Platform Uptime", `${performance.platformUptime}%`, performance.platformUptime >= 99 ? "All systems operational" : "Review system health", "text-emerald-600"],
-    ["Monthly Revenue", formatCompactINR(performance.monthlyRevenue), `${performance.revenueGrowth}% from last month`, "text-blue-600"],
+    ["Total Revenue", formatCompactINR(performance.monthlyRevenue), `${performance.revenueGrowth}% from last month`, "text-blue-600"],
+    ["Total Expense", formatCompactINR(performance.monthlyExpenses), "Platform expenses this month", "text-red-600"],
+    ["Net Profit", formatCompactINR(performance.netProfit), "Revenue - Expense", "text-emerald-600"],
     ["Active Support Tickets", performance.activeSupportTickets.toString(), `${performance.criticalSupportTickets} marked critical`, "text-orange-600"],
   ];
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-5">
       {cards.map(([label, value, meta, color]) => (
-        <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div key={label} className="rounded-3xl border border-white/60 bg-white/60 p-6 shadow-xl shadow-slate-200/40 backdrop-blur-xl hover:bg-white/80 hover:-translate-y-0.5 transition-all">
           <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
           <p className={`mt-2 text-2xl font-extrabold ${color}`}>{value}</p>
           <p className="mt-1 text-sm font-semibold text-slate-500">{meta}</p>
@@ -801,4 +892,88 @@ function relativeTime(date: string) {
   if (hours < 24) return `${hours} hours ago`;
   const days = Math.floor(hours / 24);
   return days === 1 ? "Yesterday" : `${days} days ago`;
+}
+
+function ExpenseModal({
+  isSaving,
+  error,
+  onClose,
+  onSubmit,
+}: {
+  isSaving: boolean;
+  error: string;
+  onClose: () => void;
+  onSubmit: (form: ExpenseFormState) => void;
+}) {
+  const [draft, setDraft] = useState<ExpenseFormState>(emptyExpenseForm);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit(draft);
+        }}
+        className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+      >
+        <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-900">Add Platform Expense</h2>
+              <p className="mt-1 text-sm font-medium text-slate-500">Record a new platform expense.</p>
+            </div>
+            <button type="button" onClick={onClose} className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="px-6 py-6 space-y-4">
+          <TextInput label="Expense Title" value={draft.title} onChange={(value) => setDraft({ ...draft, title: value })} required placeholder="e.g. AWS Hosting" />
+          
+          <label className="text-sm font-bold text-slate-700 block">
+            Category
+            <div className="relative mt-1.5">
+              <select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })} className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                <option value="Server">Server</option>
+                <option value="Salary">Salary</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Legal">Legal</option>
+                <option value="Software">Software</option>
+                <option value="Other">Other</option>
+              </select>
+              <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+          </label>
+
+          <label className="block text-sm font-bold text-slate-700">
+            Amount (INR) <span className="text-red-500">*</span>
+            <input 
+              type="number" 
+              value={draft.amount || ""} 
+              required
+              min={1}
+              onChange={(event) => setDraft({ ...draft, amount: Number(event.target.value) })} 
+              placeholder="0.00"
+              className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" 
+            />
+          </label>
+          <TextInput label="Description (Optional)" value={draft.description} onChange={(value) => setDraft({ ...draft, description: value })} placeholder="More details..." />
+          
+          {error ? (
+            <div className="mt-4 flex items-start gap-3 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">
+              <ShieldAlert size={18} className="mt-0.5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-5 flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="rounded-xl px-5 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200 hover:text-slate-900">Cancel</button>
+          <button disabled={isSaving} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-60">
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : null} Save Expense
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }

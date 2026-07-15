@@ -48,8 +48,6 @@ export default function AdminLayout() {
     { name: "Dashboard", path: "/super-owner/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Companies", path: "/super-owner/companies", icon: <Building2 size={20} /> },
     { name: "Users", path: "/super-owner/users", icon: <Users size={20} /> },
-    { name: "Plans & Billing", path: "/super-owner/plans", icon: <CreditCard size={20} /> },
-    { name: "Subscriptions", path: "/super-owner/subscriptions", icon: <CreditCard size={20} /> },
     { name: "System Logs", path: "/super-owner/logs", icon: <History size={20} /> },
     { name: "Announcements", path: "/super-owner/announcements", icon: <Megaphone size={20} /> },
     { name: "Support Tickets", path: "/super-owner/support", icon: <LifeBuoy size={20} /> },

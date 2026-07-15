@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Company from '../models/Company.js';
+import Project from '../models/Project.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -81,11 +82,30 @@ const createDemoUserIfAllowed = async (email, password) => {
     companyId = company._id;
   }
 
+  let projectIds = [];
+  if (demoUser.role === 'project_owner' && companyId) {
+    const project = await Project.findOneAndUpdate(
+      { name: 'Skyline Towers (Demo)' },
+      {
+        companyId,
+        name: 'Skyline Towers (Demo)',
+        clientName: 'Demo Client',
+        location: 'Mumbai, India',
+        status: 'in_progress',
+        budget: 50000000,
+        approvedBudget: 50000000,
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+    projectIds = [project._id];
+  }
+
   return User.create({
     ...demoUser,
     password: demoPassword,
     isActive: true,
     companyId,
+    projectIds,
   });
 };
 

@@ -1,136 +1,196 @@
 import { Link } from "react-router-dom";
 import PublicNavbar from "../components/PublicNavbar";
-import { ArrowRight, HardHat, Shield, Activity, Building2 } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-200">
+    <div className="min-h-screen bg-[#111111] font-sans selection:bg-[#ffd000] selection:text-black">
       <PublicNavbar />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 relative overflow-hidden">
-        {/* Abstract Background Shapes */}
-        <div className="absolute top-0 right-0 -mr-32 -mt-32 w-[600px] h-[600px] bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-[500px] h-[500px] bg-indigo-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-        
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-semibold mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            BuildFlow 2.0 is now live
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-            Build the Future with <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              AI-Powered Management
-            </span>
+      <section className="pt-40 pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase mb-8 leading-[0.9]">
+            Construction Hub
           </h1>
           
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-            The ultimate ERP system for construction. Track progress, monitor safety with AI, and manage budgets in real-time all in one place.
+          <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mb-12 font-medium leading-relaxed">
+            A unified cloud-native operating system for construction project delivery, connecting planning, labor, and finance in one accountable platform.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-            <Link to="/signup" className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
-              Start Free Trial <ArrowRight size={20} />
-            </Link>
-            <Link to="/login" className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 rounded-xl font-bold text-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors flex items-center justify-center">
-              View Demo
-            </Link>
-          </div>
-        </div>
-        
-        {/* Dashboard Preview Image */}
-        <div className="max-w-6xl mx-auto mt-20 relative animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-500">
-           <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent z-10"></div>
-           <div className="rounded-2xl border border-slate-200/60 shadow-2xl overflow-hidden bg-white">
-              <img 
-                src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=2000" 
-                alt="Construction Management Dashboard" 
-                className="w-full h-[500px] object-cover" 
-              />
-           </div>
+          <Link to="/login" className="inline-block px-8 py-4 bg-[#ffd000] text-black font-black uppercase tracking-wider text-sm hover:bg-yellow-400 transition-colors">
+            Explore the platform
+          </Link>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 px-6 bg-white border-t border-slate-200">
+      {/* Grayscale Divider Image */}
+      <section className="w-full">
+        <img 
+          src="/construction-framework.png" 
+          alt="Construction Framework" 
+          className="w-full h-[300px] md:h-[600px] object-cover border-t border-b border-zinc-800"
+        />
+      </section>
+
+      {/* Core Modules Section */}
+      <section id="solutions" className="py-24 px-6 border-b border-zinc-800 bg-[#111111]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Everything you need to build better</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">BuildFlow replaces 5 different tools with one seamless, AI-powered platform designed specifically for the construction industry.</p>
-          </div>
+          <h2 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter mb-16">
+            Core Modules
+          </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: <HardHat size={32} className="text-orange-500" />, title: "Live Site Management", desc: "Track daily progress, weather conditions, and labour attendance in real-time." },
-              { icon: <Shield size={32} className="text-emerald-500" />, title: "AI Safety Monitor", desc: "Automatically detect PPE violations and safety hazards using camera feeds." },
-              { icon: <Activity size={32} className="text-blue-500" />, title: "Smart Budgeting", desc: "Forecast material costs and predict budget overruns before they happen." }
-            ].map((feature, i) => (
-              <div key={i} className="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
-                <div className="w-16 h-16 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Planning */}
+            <div className="border border-dashed border-zinc-700 p-8 flex flex-col hover:border-yellow-400 transition-colors group">
+              <span className="text-3xl font-black text-[#ffd000] mb-4">01</span>
+              <h3 className="text-2xl font-black text-white mb-6 uppercase">Planning</h3>
+              <div className="w-full h-px border-b border-dashed border-zinc-700 mb-6 group-hover:border-yellow-400 transition-colors"></div>
+              <p className="text-zinc-400 mb-8 flex-1 leading-relaxed">
+                Unified project architecture and digital blueprints for total operational visibility.
+              </p>
+              <Link to="/login" className="self-start border border-[#ffd000] text-[#ffd000] px-6 py-2 font-bold text-sm hover:bg-[#ffd000] hover:text-black transition-colors">
+                View Blueprint
+              </Link>
+            </div>
+
+            {/* Labor */}
+            <div className="border border-dashed border-zinc-700 p-8 flex flex-col hover:border-yellow-400 transition-colors group">
+              <span className="text-3xl font-black text-[#ffd000] mb-4">02</span>
+              <h3 className="text-2xl font-black text-white mb-6 uppercase">Labor</h3>
+              <div className="w-full h-px border-b border-dashed border-zinc-700 mb-6 group-hover:border-yellow-400 transition-colors"></div>
+              <p className="text-zinc-400 mb-8 flex-1 leading-relaxed">
+                Real-time workforce management and accountability tracking across all project sites.
+              </p>
+              <Link to="/login" className="self-start border border-[#ffd000] text-[#ffd000] px-6 py-2 font-bold text-sm hover:bg-[#ffd000] hover:text-black transition-colors">
+                Manage Workforce
+              </Link>
+            </div>
+
+            {/* Materials */}
+            <div className="border border-dashed border-zinc-700 p-8 flex flex-col hover:border-yellow-400 transition-colors group">
+              <span className="text-3xl font-black text-[#ffd000] mb-4">03</span>
+              <h3 className="text-2xl font-black text-white mb-6 uppercase">Materials</h3>
+              <div className="w-full h-px border-b border-dashed border-zinc-700 mb-6 group-hover:border-yellow-400 transition-colors"></div>
+              <p className="text-zinc-400 mb-8 flex-1 leading-relaxed">
+                Integrated procurement and inventory tracking to eliminate supply chain bottlenecks.
+              </p>
+              <Link to="/login" className="self-start border border-[#ffd000] text-[#ffd000] px-6 py-2 font-bold text-sm hover:bg-[#ffd000] hover:text-black transition-colors">
+                Track Inventory
+              </Link>
+            </div>
+
+            {/* Finance */}
+            <div className="border border-dashed border-zinc-700 p-8 flex flex-col hover:border-yellow-400 transition-colors group">
+              <span className="text-3xl font-black text-[#ffd000] mb-4">04</span>
+              <h3 className="text-2xl font-black text-white mb-6 uppercase">Finance</h3>
+              <div className="w-full h-px border-b border-dashed border-zinc-700 mb-6 group-hover:border-yellow-400 transition-colors"></div>
+              <p className="text-zinc-400 mb-8 flex-1 leading-relaxed">
+                Automated financial reconciliation and real-time cost forecasting for every project.
+              </p>
+              <Link to="/login" className="self-start border border-[#ffd000] text-[#ffd000] px-6 py-2 font-bold text-sm hover:bg-[#ffd000] hover:text-black transition-colors">
+                View Budgets
+              </Link>
+            </div>
+
+            {/* Subcontractors */}
+            <div className="border border-dashed border-zinc-700 p-8 flex flex-col hover:border-yellow-400 transition-colors group">
+              <span className="text-3xl font-black text-[#ffd000] mb-4">05</span>
+              <h3 className="text-2xl font-black text-white mb-6 uppercase">Subcontractors</h3>
+              <div className="w-full h-px border-b border-dashed border-zinc-700 mb-6 group-hover:border-yellow-400 transition-colors"></div>
+              <p className="text-zinc-400 mb-8 flex-1 leading-relaxed">
+                Centralized vendor management and performance tracking for seamless delivery.
+              </p>
+              <Link to="/login" className="self-start border border-[#ffd000] text-[#ffd000] px-6 py-2 font-bold text-sm hover:bg-[#ffd000] hover:text-black transition-colors">
+                Manage Vendors
+              </Link>
+            </div>
+
+            {/* Quality */}
+            <div className="border border-dashed border-zinc-700 p-8 flex flex-col hover:border-yellow-400 transition-colors group">
+              <span className="text-3xl font-black text-[#ffd000] mb-4">06</span>
+              <h3 className="text-2xl font-black text-white mb-6 uppercase">Quality</h3>
+              <div className="w-full h-px border-b border-dashed border-zinc-700 mb-6 group-hover:border-yellow-400 transition-colors"></div>
+              <p className="text-zinc-400 mb-8 flex-1 leading-relaxed">
+                Integrated quality assurance protocols and compliance monitoring for every phase.
+              </p>
+              <Link to="/login" className="self-start border border-[#ffd000] text-[#ffd000] px-6 py-2 font-bold text-sm hover:bg-[#ffd000] hover:text-black transition-colors">
+                Ensure Quality
+              </Link>
+            </div>
           </div>
         </div>
       </section>
       
-      {/* Premium Footer */}
-      <footer id="contact" className="bg-white text-slate-500 py-16 px-6 border-t border-slate-200 mt-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-           <div className="col-span-1 md:col-span-1">
-             <div className="flex items-center gap-2 mb-4">
-               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                 <Building2 className="text-white" size={18} />
-               </div>
-               <span className="text-xl font-bold text-slate-900">BuildFlow</span>
-             </div>
-             <p className="text-sm leading-relaxed">The modern ERP for construction. Build better, faster, and safer with AI-powered management.</p>
-           </div>
-           
-           <div>
-             <h4 className="font-semibold text-slate-900 mb-4">Product</h4>
-             <ul className="space-y-3 text-sm">
-               <li><Link to="/#features" className="hover:text-blue-600 transition-colors">Features</Link></li>
-               <li><Link to="/#solutions" className="hover:text-blue-600 transition-colors">Integrations</Link></li>
-               <li><Link to="/#pricing" className="hover:text-blue-600 transition-colors">Pricing</Link></li>
-               <li><Link to="/login" className="hover:text-blue-600 transition-colors">Changelog</Link></li>
-             </ul>
-           </div>
-           
-           <div>
-             <h4 className="font-semibold text-slate-900 mb-4">Company</h4>
-             <ul className="space-y-3 text-sm">
-               <li><Link to="/#features" className="hover:text-blue-600 transition-colors">About Us</Link></li>
-               <li><Link to="/signup" className="hover:text-blue-600 transition-colors">Careers</Link></li>
-               <li><Link to="/#solutions" className="hover:text-blue-600 transition-colors">Blog</Link></li>
-               <li><Link to="/#contact" className="hover:text-blue-600 transition-colors">Contact</Link></li>
-             </ul>
-           </div>
-           
-           <div>
-             <h4 className="font-semibold text-slate-900 mb-4">Legal</h4>
-             <ul className="space-y-3 text-sm">
-               <li><Link to="/signup" className="hover:text-blue-600 transition-colors">Privacy Policy</Link></li>
-               <li><Link to="/signup" className="hover:text-blue-600 transition-colors">Terms of Service</Link></li>
-             </ul>
-           </div>
+      {/* Platform Benefits Section */}
+      <section id="features" className="py-24 px-6 bg-[#161616]">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+          <div className="lg:w-1/2">
+            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none mb-8">
+              Platform<br/>Benefits
+            </h2>
+            <p className="text-xl text-zinc-300 mb-10 leading-relaxed max-w-lg">
+              Connect planning, labor, and finance in one accountable cloud-native OS for seamless project delivery.
+            </p>
+            <Link to="/login" className="inline-block px-8 py-4 bg-[#ffd000] text-black font-black uppercase tracking-wider text-sm hover:bg-yellow-400 transition-colors">
+              Explore Platform
+            </Link>
+          </div>
+          <div className="lg:w-1/2 w-full">
+            <img 
+              src="/dashboard-preview.png" 
+              alt="Dashboard Preview" 
+              className="w-full h-auto object-cover shadow-2xl"
+            />
+          </div>
         </div>
-        
-        <div className="max-w-7xl mx-auto pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-           <p className="text-sm">© 2026 BuildFlow ERP. All rights reserved.</p>
-           <div className="flex gap-4">
-             <div className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"></div>
-             <div className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"></div>
-             <div className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"></div>
-           </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-[#ffd000] py-20 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div>
+            <h2 className="text-4xl md:text-6xl font-black text-black tracking-tighter uppercase leading-none">
+              Ready to sync<br/>projects?
+            </h2>
+            <div className="w-24 h-1 bg-black mt-8"></div>
+          </div>
+          <Link to="/login" className="text-black font-black uppercase tracking-wider text-xl hover:opacity-70 transition-opacity">
+            Get Started
+          </Link>
+        </div>
+      </section>
+      
+      {/* Dark Footer */}
+      <footer id="contact" className="bg-[#0a0a0a] pt-16 pb-8 px-6 text-white border-t border-zinc-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 mb-16">
+            <div className="text-4xl font-black uppercase tracking-tighter">
+              Construction Hub
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-16">
+              <div>
+                <h4 className="font-black text-[#ffd000] uppercase tracking-wider mb-4">Contact</h4>
+                <a href="mailto:support@constructionhub.io" className="text-sm font-medium hover:text-yellow-400 transition-colors">support@constructionhub.io</a>
+              </div>
+              <div>
+                <h4 className="font-black text-[#ffd000] uppercase tracking-wider mb-4">Follow</h4>
+                <div className="flex items-center gap-3">
+                  <a href="#" className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center hover:opacity-80 text-xs font-bold">FB</a>
+                  <a href="#" className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center hover:opacity-80 text-xs font-bold">IG</a>
+                  <a href="#" className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center hover:opacity-80 text-xs font-bold">YT</a>
+                  <a href="#" className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:opacity-80 text-xs font-bold">X</a>
+                  <a href="#" className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center hover:opacity-80 text-xs font-bold">IN</a>
+                  <a href="#" className="w-8 h-8 rounded-full bg-black border border-zinc-700 flex items-center justify-center hover:opacity-80 text-xs font-bold">GH</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-zinc-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-zinc-500 uppercase tracking-widest">
+             <p>© 2026 Construction Hub. All rights reserved.</p>
+             <p>Operating System for Construction</p>
+          </div>
         </div>
       </footer>
     </div>

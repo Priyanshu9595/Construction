@@ -9,6 +9,8 @@ import ProjectBaseline from '../models/ProjectBaseline.js';
 import Project from '../models/Project.js';
 import SystemLog from '../models/SystemLog.js';
 import User from '../models/User.js';
+import SalarySlip from '../models/SalarySlip.js';
+import Attendance from '../models/Attendance.js';
 
 // ======================= PHASES =======================
 export const getPhases = async (req, res) => {
@@ -155,6 +157,96 @@ export const createProjectWorker = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ message: 'Error creating worker', error: error.message });
+  }
+};
+
+// ======================= WORKER PAYMENTS =======================
+export const payWorker = async (req, res) => {
+  try {
+    const { month, grossSalary, deductions, netSalary } = req.body;
+    
+    // Check if worker exists
+    const worker = await User.findOne({ _id: req.params.workerId, role: 'worker', companyId: req.user.companyId });
+    if (!worker) {
+      return res.status(404).json({ message: 'Worker not found' });
+    }
+
+    // Since a project manager could be paying a worker multiple times for different months
+    const salarySlip = await SalarySlip.create({
+      companyId: req.user.companyId,
+      workerId: req.params.workerId,
+      month,
+      grossSalary: Number(grossSalary) || 0,
+      deductions: Number(deductions) || 0,
+      netSalary: Number(netSalary) || 0,
+      paymentStatus: 'paid',
+      paymentDate: new Date(),
+    });
+
+    await SystemLog.create({
+      action: `Recorded payment for worker: ${worker.firstName} ${worker.lastName} for ${month}`,
+      performedBy: req.user._id,
+      details: { workerId: worker._id, salarySlipId: salarySlip._id, projectId: req.params.projectId },
+      ipAddress: req.ip,
+    });
+
+    res.status(201).json(salarySlip);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'A salary slip for this month already exists for this worker.' });
+    }
+    res.status(400).json({ message: 'Error processing payment', error: error.message });
+  }
+};
+
+export const getWorkerAttendanceSummary = async (req, res) => {
+  try {
+    const { month } = req.query; // Expecting YYYY-MM
+    if (!month) {
+      return res.status(400).json({ message: 'Month parameter is required (YYYY-MM)' });
+    }
+
+    const [year, m] = month.split('-');
+    const startDate = new Date(year, parseInt(m) - 1, 1);
+    const endDate = new Date(year, parseInt(m), 1);
+
+    const attendances = await Attendance.find({
+      workerId: req.params.workerId,
+      projectId: req.params.projectId,
+      attendanceDate: { $gte: startDate, $lt: endDate }
+    }).lean();
+
+    const existingSlip = await SalarySlip.findOne({ workerId: req.params.workerId, month });
+
+    let daysWorked = 0;
+    attendances.forEach(att => {
+      if (att.status === 'present') daysWorked += 1;
+      else if (att.status === 'half_day') daysWorked += 0.5;
+    });
+
+    if (existingSlip) {
+      return res.json({ 
+        daysWorked, 
+        alreadyPaid: true, 
+        paidAmount: existingSlip.netSalary 
+      });
+    }
+
+    res.json({ daysWorked, alreadyPaid: false });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching attendance summary', error: error.message });
+  }
+};
+
+export const getWorkerPaymentHistory = async (req, res) => {
+  try {
+    const slips = await SalarySlip.find({
+      workerId: req.params.workerId
+    }).sort({ createdAt: -1 }).lean();
+    
+    res.json(slips);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching payment history', error: error.message });
   }
 };
 

@@ -5,6 +5,7 @@ import SubscriptionPlan from '../models/SubscriptionPlan.js';
 import SupportTicket from '../models/SupportTicket.js';
 import SystemLog from '../models/SystemLog.js';
 import User from '../models/User.js';
+import PlatformExpense from '../models/PlatformExpense.js';
 
 const PLAN_COLORS = ['#2563eb', '#f97316', '#7c3aed', '#16a34a', '#0891b2', '#64748b'];
 
@@ -249,6 +250,9 @@ export const getDashboard = async (req, res) => {
       last30DaysRevenue,
       previous30DaysRevenue,
       failedOrPendingPayments,
+      thisMonthExpenses,
+      last30DaysExpenses,
+      recentExpenses,
     ] = await Promise.all([
       Company.countDocuments(),
       Company.countDocuments({ status: 'active' }),
@@ -288,6 +292,15 @@ export const getDashboard = async (req, res) => {
         { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Payment.countDocuments({ status: { $in: ['failed', 'pending'] } }),
+      PlatformExpense.aggregate([
+        { $match: { date: { $gte: startOfThisMonth } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      PlatformExpense.aggregate([
+        { $match: { date: { $gte: startOfLast30Days } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      PlatformExpense.find({}).sort({ date: -1 }).limit(5).populate('recordedBy', 'firstName lastName').lean(),
     ]);
 
     const companyIds = companies.map((company) => company._id);
@@ -328,6 +341,9 @@ export const getDashboard = async (req, res) => {
     const previous30Revenue = sumAggregate(previous30DaysRevenue);
     const revenueGrowth = calculateGrowth(last30Revenue || monthlyRevenue, previous30Revenue || previousRevenue);
 
+    const monthlyExpenses = sumAggregate(thisMonthExpenses);
+    const netProfit = monthlyRevenue - monthlyExpenses;
+
     res.json({
       generatedAt: now,
       stats: {
@@ -339,6 +355,18 @@ export const getDashboard = async (req, res) => {
         usersThisMonth,
         projectsThisMonth,
         activationRate: totalCompanies ? Number(((activeCompanies / totalCompanies) * 100).toFixed(1)) : 0,
+      },
+      financials: {
+        revenue: monthlyRevenue,
+        expenses: monthlyExpenses,
+        netProfit,
+        recentExpenses: recentExpenses.map((exp) => ({
+          id: exp._id,
+          title: exp.title,
+          amount: exp.amount,
+          category: exp.category,
+          date: exp.date,
+        }))
       },
       platformGrowth: buildMonthlyGrowth(monthlyCompanyRegistrations, totalCompanies, currentYear),
       companiesByPlan: planRows,
@@ -356,6 +384,7 @@ export const getDashboard = async (req, res) => {
           ownerLastName: ownerInfo?.lastName || '',
           ownerEmail: ownerInfo?.email || '',
           plan: company.planId?.name || 'Unassigned',
+          planId: company.planId?._id || '',
           users: userCountByCompany[key] || 0,
           projects: projectCountByCompany[key] || 0,
           joinedDate: company.registrationDate || company.createdAt,
@@ -370,6 +399,7 @@ export const getDashboard = async (req, res) => {
           monthlyRevenue: plan.monthlyRevenue,
         })),
         totalMonthlyRevenue: monthlyRevenue,
+        totalMonthlyExpenses: monthlyExpenses,
         annualRecurringRevenue: monthlyRevenue * 12,
         revenueGrowth,
       },
@@ -388,6 +418,8 @@ export const getDashboard = async (req, res) => {
       performance: {
         platformUptime: Number(process.env.PLATFORM_UPTIME || 100),
         monthlyRevenue,
+        monthlyExpenses,
+        netProfit,
         revenueGrowth,
         activeSupportTickets: ticketsOpen,
         criticalSupportTickets: ticketsCritical,
@@ -395,6 +427,48 @@ export const getDashboard = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Server Error fetching dashboard', error: error.message });
+  }
+};
+
+// @desc    Get all platform expenses
+// @route   GET /api/admin/expenses
+// @access  Private/SuperAdmin
+export const getPlatformExpenses = async (req, res) => {
+  try {
+    const expenses = await PlatformExpense.find({}).sort({ date: -1 }).populate('recordedBy', 'firstName lastName');
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching platform expenses', error: error.message });
+  }
+};
+
+// @desc    Create platform expense
+// @route   POST /api/admin/expenses
+// @access  Private/SuperAdmin
+export const createPlatformExpense = async (req, res) => {
+  try {
+    const expense = await PlatformExpense.create({
+      ...req.body,
+      recordedBy: req.user._id,
+    });
+    res.status(201).json(expense);
+  } catch (error) {
+    res.status(400).json({ message: 'Error creating platform expense', error: error.message });
+  }
+};
+
+// @desc    Delete platform expense
+// @route   DELETE /api/admin/expenses/:id
+// @access  Private/SuperAdmin
+export const deletePlatformExpense = async (req, res) => {
+  try {
+    const expense = await PlatformExpense.findByIdAndDelete(req.params.id);
+    if (!expense) {
+      return res.status(404).json({ message: 'Expense not found' });
+    }
+    res.json({ message: 'Expense removed' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting platform expense', error: error.message });
   }
 };
 

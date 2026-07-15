@@ -5,7 +5,7 @@ import {
   getCostCodes, createCostCode,
   getBOQ, createBOQItem, bulkCreateBOQ, updateBOQItem, deleteBOQItem,
   getBudget, updateBudget, createBudgetLine,
-  freezeBaseline 
+  freezeBaseline, payWorker, getWorkerAttendanceSummary, getWorkerPaymentHistory
 } from '../controllers/planningController.js';
 import { protect, requireCompanyAccess } from '../middleware/authMiddleware.js';
 
@@ -27,6 +27,10 @@ router.post('/tasks/:taskId/assign', assignTask);
 router.route('/workers')
   .get(getProjectWorkers)
   .post(createProjectWorker);
+
+router.get('/workers/:workerId/attendance-summary', getWorkerAttendanceSummary);
+router.get('/workers/:workerId/payments', getWorkerPaymentHistory);
+router.post('/workers/:workerId/pay', payWorker);
 
 router.post('/boq/bulk', bulkCreateBOQ);
 router.route('/boq')
