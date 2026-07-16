@@ -19,7 +19,21 @@ export const getProjects = async (req, res) => {
 // @access  Private (Company Owner/Admin)
 export const createProject = async (req, res) => {
   try {
-    const { name, clientName, location, budget, status, expectedProfit, projectManagerId, pmFirstName, pmLastName, pmEmail, pmPassword } = req.body;
+    const {
+      name,
+      clientName,
+      location,
+      budget,
+      approvedBudget,
+      contractValue,
+      status,
+      expectedProfit,
+      projectManagerId,
+      pmFirstName,
+      pmLastName,
+      pmEmail,
+      pmPassword,
+    } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: 'Project name is required' });
@@ -51,7 +65,9 @@ export const createProject = async (req, res) => {
       name,
       clientName,
       location,
-      budget: Number(budget) || 0,
+      budget: Number(approvedBudget ?? budget) || 0,
+      approvedBudget: Number(approvedBudget ?? budget) || 0,
+      contractValue: Number(contractValue) || 0,
       expectedProfit: Number(expectedProfit) || 0,
       status: status || 'not_started',
       projectManagerIds: finalPmId ? [finalPmId] : [],
@@ -73,7 +89,8 @@ export const createProject = async (req, res) => {
 
     res.status(201).json(project);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating project', error: error.message });
+    console.error('Error in createProject:', error);
+    res.status(400).json({ message: 'Error creating project', error: error.message, stack: error.stack });
   }
 };
 
@@ -109,9 +126,29 @@ export const deleteProject = async (req, res) => {
 // @access  Private (Company Owner/Admin)
 export const updateProject = async (req, res) => {
   try {
+    const updates = { ...req.body };
+    if ('approvedBudget' in updates) {
+      updates.approvedBudget = Number(updates.approvedBudget) || 0;
+      updates.budget = updates.approvedBudget;
+    } else if ('budget' in updates) {
+      updates.budget = Number(updates.budget) || 0;
+      updates.approvedBudget = updates.budget;
+    }
+    if ('contractValue' in updates) updates.contractValue = Number(updates.contractValue) || 0;
+    if ('expectedProfit' in updates) updates.expectedProfit = Number(updates.expectedProfit) || 0;
+    if (updates.status === 'completed') {
+      updates.progress = 100;
+      updates.progressPercentage = 100;
+    }
+    if (Number(updates.progress) >= 100 || Number(updates.progressPercentage) >= 100) {
+      updates.progress = 100;
+      updates.progressPercentage = 100;
+      updates.status = 'completed';
+    }
+
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, companyId: req.user.companyId, deletedAt: null },
-      req.body,
+      updates,
       { new: true }
     );
     

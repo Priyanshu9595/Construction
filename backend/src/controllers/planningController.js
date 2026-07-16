@@ -9,8 +9,10 @@ import ProjectBaseline from '../models/ProjectBaseline.js';
 import Project from '../models/Project.js';
 import SystemLog from '../models/SystemLog.js';
 import User from '../models/User.js';
+import Worker from '../models/Worker.js';
 import SalarySlip from '../models/SalarySlip.js';
 import Attendance from '../models/Attendance.js';
+import Expense from '../models/Expense.js';
 
 // ======================= PHASES =======================
 export const getPhases = async (req, res) => {
@@ -109,13 +111,25 @@ export const assignTask = async (req, res) => {
 
 export const getProjectWorkers = async (req, res) => {
   try {
-    const workers = await User.find({
-      role: 'worker',
-      companyId: req.user.companyId,
-      projectIds: req.params.projectId,
-      deletedAt: null
-    }).select('firstName lastName email employeeCode trade dailyWage skillLevel');
-    res.json(workers);
+    const [workers, legacyUsers] = await Promise.all([
+      Worker.find({
+        companyId: req.user.companyId,
+        projectIds: req.params.projectId,
+        deletedAt: null,
+        employmentStatus: { $ne: 'blocked' },
+      }).select('name mobile workerCode trade dailyWage skillLevel projectIds').lean(),
+      User.find({
+        role: 'worker',
+        companyId: req.user.companyId,
+        projectIds: req.params.projectId,
+        deletedAt: null
+      }).select('firstName lastName email employeeCode trade dailyWage skillLevel projectIds').lean(),
+    ]);
+
+    res.json([
+      ...workers.map(serializeWorkerForProject),
+      ...legacyUsers,
+    ]);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching workers', error: error.message });
   }
@@ -163,10 +177,14 @@ export const createProjectWorker = async (req, res) => {
 // ======================= WORKER PAYMENTS =======================
 export const payWorker = async (req, res) => {
   try {
-    const { month, grossSalary, deductions, netSalary } = req.body;
+    const { month, workDate, grossSalary, deductions, netSalary } = req.body;
+    const payPeriod = workDate || month;
+    if (!payPeriod) {
+      return res.status(400).json({ message: 'Payment date is required' });
+    }
     
     // Check if worker exists
-    const worker = await User.findOne({ _id: req.params.workerId, role: 'worker', companyId: req.user.companyId });
+    const worker = await findProjectWorker(req.user.companyId, req.params.projectId, req.params.workerId);
     if (!worker) {
       return res.status(404).json({ message: 'Worker not found' });
     }
@@ -175,7 +193,7 @@ export const payWorker = async (req, res) => {
     const salarySlip = await SalarySlip.create({
       companyId: req.user.companyId,
       workerId: req.params.workerId,
-      month,
+      month: payPeriod,
       grossSalary: Number(grossSalary) || 0,
       deductions: Number(deductions) || 0,
       netSalary: Number(netSalary) || 0,
@@ -183,8 +201,23 @@ export const payWorker = async (req, res) => {
       paymentDate: new Date(),
     });
 
+    await Expense.create({
+      companyId: req.user.companyId,
+      projectId: req.params.projectId,
+      invoiceNumber: `SAL-${salarySlip._id}`,
+      description: `Worker Salary: ${worker.displayName} (${payPeriod})`,
+      category: 'Labour',
+      amount: Number(netSalary) || 0,
+      totalAmount: Number(netSalary) || 0,
+      date: new Date(),
+      expenseDate: new Date(),
+      incurredBy: req.user.firstName + ' ' + req.user.lastName,
+      status: 'paid',
+      createdBy: req.user._id
+    });
+
     await SystemLog.create({
-      action: `Recorded payment for worker: ${worker.firstName} ${worker.lastName} for ${month}`,
+      action: `Recorded payment for worker: ${worker.displayName} for ${payPeriod}`,
       performedBy: req.user._id,
       details: { workerId: worker._id, salarySlipId: salarySlip._id, projectId: req.params.projectId },
       ipAddress: req.ip,
@@ -193,7 +226,7 @@ export const payWorker = async (req, res) => {
     res.status(201).json(salarySlip);
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({ message: 'A salary slip for this month already exists for this worker.' });
+      return res.status(400).json({ message: 'A salary slip for this payment date already exists for this worker.' });
     }
     res.status(400).json({ message: 'Error processing payment', error: error.message });
   }
@@ -201,14 +234,17 @@ export const payWorker = async (req, res) => {
 
 export const getWorkerAttendanceSummary = async (req, res) => {
   try {
-    const { month } = req.query; // Expecting YYYY-MM
-    if (!month) {
-      return res.status(400).json({ message: 'Month parameter is required (YYYY-MM)' });
+    const { date, month } = req.query;
+    const payPeriod = date || month;
+    if (!payPeriod) {
+      return res.status(400).json({ message: 'Date parameter is required' });
     }
 
-    const [year, m] = month.split('-');
-    const startDate = new Date(year, parseInt(m) - 1, 1);
-    const endDate = new Date(year, parseInt(m), 1);
+    const { startDate, endDate } = getAttendancePeriod(payPeriod);
+    const worker = await findProjectWorker(req.user.companyId, req.params.projectId, req.params.workerId);
+    if (!worker) {
+      return res.status(404).json({ message: 'Worker not found' });
+    }
 
     const attendances = await Attendance.find({
       workerId: req.params.workerId,
@@ -216,7 +252,7 @@ export const getWorkerAttendanceSummary = async (req, res) => {
       attendanceDate: { $gte: startDate, $lt: endDate }
     }).lean();
 
-    const existingSlip = await SalarySlip.findOne({ workerId: req.params.workerId, month });
+    const existingSlip = await SalarySlip.findOne({ workerId: req.params.workerId, month: payPeriod });
 
     let daysWorked = 0;
     attendances.forEach(att => {
@@ -240,6 +276,11 @@ export const getWorkerAttendanceSummary = async (req, res) => {
 
 export const getWorkerPaymentHistory = async (req, res) => {
   try {
+    const worker = await findProjectWorker(req.user.companyId, req.params.projectId, req.params.workerId);
+    if (!worker) {
+      return res.status(404).json({ message: 'Worker not found' });
+    }
+
     const slips = await SalarySlip.find({
       workerId: req.params.workerId
     }).sort({ createdAt: -1 }).lean();
@@ -357,9 +398,13 @@ export const getBudget = async (req, res) => {
   try {
     let budget = await ProjectBudget.findOne({ projectId: req.params.projectId, deletedAt: null });
     if (!budget) {
+      const project = await Project.findOne({ _id: req.params.projectId, companyId: req.user.companyId, deletedAt: null }).lean();
       budget = await ProjectBudget.create({
         projectId: req.params.projectId,
-        companyId: req.user.companyId
+        companyId: req.user.companyId,
+        contractValue: Number(project?.contractValue || project?.approvedBudget || project?.budget || 0),
+        approvedBudget: Number(project?.approvedBudget || project?.budget || 0),
+        expectedProfit: Number(project?.expectedProfit || 0),
       });
     }
     const lines = await BudgetLine.find({ budgetId: budget._id, deletedAt: null }).populate('costCodeId');
@@ -371,11 +416,41 @@ export const getBudget = async (req, res) => {
 
 export const updateBudget = async (req, res) => {
   try {
+    const numericFields = ['contractValue', 'approvedBudget', 'expectedProfit'];
+    const budgetUpdates = { ...req.body };
+    numericFields.forEach((field) => {
+      if (field in budgetUpdates) {
+        budgetUpdates[field] = Number(budgetUpdates[field]) || 0;
+      }
+    });
+
     const budget = await ProjectBudget.findOneAndUpdate(
       { projectId: req.params.projectId, deletedAt: null },
-      { $set: req.body },
+      {
+        $set: budgetUpdates,
+        $setOnInsert: {
+          projectId: req.params.projectId,
+          companyId: req.user.companyId,
+        },
+      },
       { new: true, upsert: true }
     );
+
+    const projectUpdates = {};
+    if ('contractValue' in budgetUpdates) projectUpdates.contractValue = budgetUpdates.contractValue;
+    if ('approvedBudget' in budgetUpdates) {
+      projectUpdates.approvedBudget = budgetUpdates.approvedBudget;
+      projectUpdates.budget = budgetUpdates.approvedBudget;
+    }
+    if ('expectedProfit' in budgetUpdates) projectUpdates.expectedProfit = budgetUpdates.expectedProfit;
+
+    if (Object.keys(projectUpdates).length) {
+      await Project.findOneAndUpdate(
+        { _id: req.params.projectId, companyId: req.user.companyId, deletedAt: null },
+        { $set: projectUpdates }
+      );
+    }
+
     res.json(budget);
   } catch (error) {
     res.status(400).json({ message: 'Error updating budget', error: error.message });
@@ -458,4 +533,69 @@ export const freezeBaseline = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error freezing baseline', error: error.message });
   }
+};
+
+const serializeWorkerForProject = (worker) => {
+  const [firstName = worker.name || '', ...lastNameParts] = (worker.name || '').trim().split(/\s+/);
+  return {
+    _id: worker._id,
+    firstName,
+    lastName: lastNameParts.join(' '),
+    email: worker.mobile,
+    employeeCode: worker.workerCode,
+    mobile: worker.mobile,
+    trade: worker.trade,
+    dailyWage: worker.dailyWage,
+    skillLevel: worker.skillLevel,
+    projectIds: worker.projectIds,
+    source: 'worker',
+  };
+};
+
+const findProjectWorker = async (companyId, projectId, workerId) => {
+  const worker = await Worker.findOne({
+    _id: workerId,
+    companyId,
+    projectIds: projectId,
+    deletedAt: null,
+  }).lean();
+
+  if (worker) {
+    return {
+      ...worker,
+      displayName: worker.name,
+    };
+  }
+
+  const legacyUser = await User.findOne({
+    _id: workerId,
+    role: 'worker',
+    companyId,
+    projectIds: projectId,
+    deletedAt: null,
+  }).lean();
+
+  if (!legacyUser) {
+    return null;
+  }
+
+  return {
+    ...legacyUser,
+    displayName: `${legacyUser.firstName || ''} ${legacyUser.lastName || ''}`.trim() || legacyUser.email,
+  };
+};
+
+const getAttendancePeriod = (period) => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(period)) {
+    const [year, month, day] = period.split('-').map(Number);
+    const startDate = new Date(year, month - 1, day);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 1);
+    return { startDate, endDate };
+  }
+
+  const [year, month] = period.split('-').map(Number);
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 1);
+  return { startDate, endDate };
 };

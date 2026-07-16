@@ -110,7 +110,10 @@ const projectSchema = new mongoose.Schema(
 );
 
 projectSchema.index({ companyId: 1, status: 1, deletedAt: 1 });
-projectSchema.index({ companyId: 1, projectCode: 1 }, { unique: true, sparse: true });
+projectSchema.index(
+  { companyId: 1, projectCode: 1 }, 
+  { unique: true, partialFilterExpression: { companyId: { $exists: true }, projectCode: { $exists: true }, deletedAt: null } }
+);
 projectSchema.index({ projectManagerIds: 1 });
 
 const Project = mongoose.model('Project', projectSchema);

@@ -11,6 +11,7 @@ import Project from '../models/Project.js';
 import SitePhoto from '../models/SitePhoto.js';
 import Task from '../models/Task.js';
 import User from '../models/User.js';
+import Expense from '../models/Expense.js';
 
 export const getCompanySummary = async (req, res) => {
   try {
@@ -21,7 +22,7 @@ export const getCompanySummary = async (req, res) => {
       Approval.countDocuments({ companyId, status: 'pending' }),
     ]);
 
-    const totalBudget = sum(projects, 'approvedBudget');
+    const totalBudget = sumProjectBudget(projects);
     const actualCost = sum(projects, 'actualCost');
     const expectedProfit = sum(projects, 'expectedProfit');
 
@@ -143,14 +144,14 @@ export const getCompanyAlerts = async (req, res) => {
 export const getCompanyFinancialOverview = async (req, res) => {
   try {
     const projects = await Project.find({ companyId: req.companyId, deletedAt: null }).lean();
-    const materialCost = await MaterialUsage.aggregate([
-      { $match: { companyId: req.companyId } },
-      { $group: { _id: null, total: { $sum: '$cost' } } },
+    const expenses = await Expense.aggregate([
+      { $match: activeExpenseMatch({ companyId: req.companyId }) },
+      { $group: { _id: null, total: { $sum: expenseAmountExpression } } }
     ]);
-    const totalBudget = sum(projects, 'approvedBudget');
-    const totalExpenses = sum(projects, 'actualCost') + (materialCost[0]?.total || 0);
+    const totalBudget = sumProjectBudget(projects);
+    const totalExpenses = expenses[0]?.total || 0;
     const totalCommittedCost = sum(projects, 'committedCost');
-    const totalExpectedRevenue = sum(projects, 'contractValue');
+    const totalExpectedRevenue = sumCompletedProjectRevenue(projects);
     const totalExpectedProfit = totalExpectedRevenue - totalExpenses - totalCommittedCost;
 
     res.json({
@@ -179,17 +180,21 @@ export const getProjectSummary = async (req, res) => {
   try {
     const project = req.project;
     const today = dayRange(new Date());
-    const [labourToday, pendingTasks, openIssues, pendingApprovals] = await Promise.all([
+    const [labourToday, pendingTasks, openIssues, pendingApprovals, expenses] = await Promise.all([
       Attendance.aggregate([{ $match: { projectId: project._id, attendanceDate: today.match, status: 'present', approved: true } }, { $group: { _id: null, total: { $sum: '$workerCount' } } }]),
       Task.countDocuments({ projectId: project._id, status: { $in: ['not_started', 'in_progress', 'blocked', 'delayed'] }, deletedAt: null }),
       Issue.countDocuments({ projectId: project._id, status: { $nin: ['resolved', 'closed'] }, deletedAt: null }),
       Approval.countDocuments({ projectId: project._id, status: 'pending' }),
+      Expense.aggregate([{ $match: activeExpenseMatch({ projectId: project._id }) }, { $group: { _id: null, total: { $sum: expenseAmountExpression } } }]),
     ]);
+
+    const totalExpenses = expenses[0]?.total || 0;
+    const approvedBudget = project.approvedBudget || project.budget || 0;
 
     res.json({
       project: serializeProject(project),
       overallProgress: await calculateProjectProgress(project._id),
-      budgetUsed: percent(project.actualCost, project.approvedBudget || project.budget),
+      budgetUsed: percent(totalExpenses, approvedBudget),
       daysPassed: daysBetween(project.plannedStartDate || project.startDate, new Date()),
       totalDays: daysBetween(project.plannedStartDate || project.startDate, project.plannedEndDate || project.endDate),
       delayDays: delayDays(project),
@@ -197,6 +202,7 @@ export const getProjectSummary = async (req, res) => {
       pendingTasks,
       openIssues,
       pendingApprovals,
+      totalExpenses,
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to load project summary', error: error.message });
@@ -217,13 +223,33 @@ export const getProjectProgress = async (req, res) => {
 };
 
 export const getProjectBudget = async (req, res) => {
-  const project = req.project;
-  const approvedBudget = project.approvedBudget || project.budget || 0;
-  const actualCost = project.actualCost || 0;
-  const committedCost = project.committedCost || 0;
-  const remainingBudget = approvedBudget - actualCost - committedCost;
-  const forecastCostAtCompletion = actualCost + committedCost;
-  res.json({ approvedBudget, actualCost, committedCost, remainingBudget, forecastCostAtCompletion, expectedVariance: forecastCostAtCompletion - approvedBudget });
+  try {
+    const project = req.project;
+    const approvedBudget = project.approvedBudget || project.budget || 0;
+    
+    const expenses = await Expense.aggregate([
+      { $match: activeExpenseMatch({ projectId: project._id }) },
+      { $group: { _id: null, total: { $sum: expenseAmountExpression } } }
+    ]);
+    const actualCost = expenses.length > 0 ? expenses[0].total : (project.actualCost || 0);
+
+    const committedCost = project.committedCost || 0;
+    const remainingBudget = approvedBudget - actualCost - committedCost;
+    const forecastCostAtCompletion = actualCost + committedCost;
+
+    res.json({ 
+      revenue: isRevenueRecognized(project) ? project.contractValue || 0 : 0,
+      expense: actualCost,
+      approvedBudget, 
+      actualCost, 
+      committedCost, 
+      remainingBudget, 
+      forecastCostAtCompletion, 
+      expectedVariance: forecastCostAtCompletion - approvedBudget 
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to load project budget', error: error.message });
+  }
 };
 
 export const getProjectTasks = async (req, res) => {
@@ -294,11 +320,29 @@ export const getSiteDashboard = async (req, res) => {
 };
 
 const sum = (rows, key) => rows.reduce((total, row) => total + (row[key] || 0), 0);
+const projectBudget = (project) => project.approvedBudget || project.budget || 0;
+const sumProjectBudget = (projects) => projects.reduce((total, project) => total + projectBudget(project), 0);
+const isRevenueRecognized = (project) =>
+  project.status === 'completed' || (project.progressPercentage || 0) >= 100 || (project.progress || 0) >= 100;
+const sumCompletedProjectRevenue = (projects) =>
+  projects.reduce((total, project) => total + (isRevenueRecognized(project) ? project.contractValue || 0 : 0), 0);
 const percent = (value = 0, total = 0) => total ? Math.round((value / total) * 100) : 0;
 const daysBetween = (start, end) => start && end ? Math.max(0, Math.ceil((new Date(end) - new Date(start)) / 86400000)) : 0;
 const delayDays = (project) => project.forecastEndDate && project.plannedEndDate ? Math.max(0, daysBetween(project.plannedEndDate, project.forecastEndDate)) : 0;
 const isProjectDelayed = (project) => delayDays(project) > 0 || project.healthStatus === 'delayed';
 const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+const activeExpenseMatch = (scope) => ({
+  ...scope,
+  deletedAt: null,
+  status: { $nin: ['rejected', 'cancelled'] },
+});
+const expenseAmountExpression = {
+  $cond: [
+    { $gt: ['$amount', 0] },
+    '$amount',
+    { $ifNull: ['$totalAmount', 0] },
+  ],
+};
 const dayRange = (date) => {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);

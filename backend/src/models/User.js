@@ -31,7 +31,11 @@ const userSchema = new mongoose.Schema(
       enum: [
         'super_owner',
         'company_owner',
+        'company_admin',
+        'admin',
         'project_owner',
+        'project_manager',
+        'site_supervisor',
         'worker'
       ],
       required: true,

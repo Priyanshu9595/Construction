@@ -5,11 +5,14 @@ const expenseSchema = new mongoose.Schema(
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true, index: true },
     projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', index: true },
     siteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Site', index: true },
-    expenseNumber: { type: String, required: true },
+    expenseNumber: { type: String, required: false }, // Made optional
     expenseDate: { type: Date, default: Date.now, index: true },
+    date: { type: Date, default: Date.now, index: true }, // Added for ProjectFinance
     payeeName: String,
+    incurredBy: String, // Added for ProjectFinance
     category: { type: String, default: 'Other' },
     description: String,
+    amount: { type: Number, default: 0 }, // Added for ProjectFinance
     baseAmount: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0 },
     totalAmount: { type: Number, default: 0 },

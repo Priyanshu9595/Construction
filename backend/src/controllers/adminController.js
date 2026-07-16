@@ -6,6 +6,7 @@ import SupportTicket from '../models/SupportTicket.js';
 import SystemLog from '../models/SystemLog.js';
 import User from '../models/User.js';
 import PlatformExpense from '../models/PlatformExpense.js';
+import Expense from '../models/Expense.js';
 
 const PLAN_COLORS = ['#2563eb', '#f97316', '#7c3aed', '#16a34a', '#0891b2', '#64748b'];
 
@@ -212,6 +213,209 @@ export const createPlan = async (req, res) => {
   }
 };
 
+// @desc    Get Super Admin module data
+// @route   GET /api/admin/modules/:module
+// @access  Private/SuperAdmin
+export const getAdminModuleData = async (req, res) => {
+  try {
+    const module = req.params.module;
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    if (module === 'companies') {
+      const [companies, totalCompanies, activeCompanies, newThisMonth] = await Promise.all([
+        Company.find({})
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .populate('ownerId', 'firstName lastName email')
+          .lean(),
+        Company.countDocuments(),
+        Company.countDocuments({ status: 'active' }),
+        Company.countDocuments({ createdAt: { $gte: startOfThisMonth } }),
+      ]);
+
+      return res.json({
+        title: 'Companies',
+        stats: [
+          { label: 'Total Companies', value: totalCompanies, tone: 'blue' },
+          { label: 'Active Companies', value: activeCompanies, tone: 'emerald' },
+          { label: 'New This Month', value: newThisMonth, tone: 'purple' },
+        ],
+        columns: ['Company', 'Owner', 'Email', 'Phone', 'Status', 'Joined'],
+        rows: companies.map((company) => ({
+          id: company._id,
+          cells: [
+            company.companyName,
+            company.ownerId ? `${company.ownerId.firstName || ''} ${company.ownerId.lastName || ''}`.trim() || company.ownerId.email : 'Not assigned',
+            company.email || '-',
+            company.phone || '-',
+            company.status || 'pending',
+            company.createdAt,
+          ],
+        })),
+      });
+    }
+
+    if (module === 'users') {
+      const [users, totalUsers, activeUsers, inactiveUsers] = await Promise.all([
+        User.find({ deletedAt: null })
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .populate('companyId', 'companyName')
+          .select('firstName lastName email role isActive companyId lastLoginAt createdAt')
+          .lean(),
+        User.countDocuments({ deletedAt: null }),
+        User.countDocuments({ deletedAt: null, isActive: true }),
+        User.countDocuments({ deletedAt: null, isActive: false }),
+      ]);
+
+      return res.json({
+        title: 'Users',
+        stats: [
+          { label: 'Total Users', value: totalUsers, tone: 'blue' },
+          { label: 'Active Users', value: activeUsers, tone: 'emerald' },
+          { label: 'Inactive Users', value: inactiveUsers, tone: 'amber' },
+        ],
+        columns: ['User', 'Email', 'Role', 'Company', 'Status', 'Last Login'],
+        rows: users.map((user) => ({
+          id: user._id,
+          cells: [
+            `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            user.email,
+            user.role,
+            user.companyId?.companyName || 'Platform',
+            user.isActive ? 'active' : 'inactive',
+            user.lastLoginAt || '',
+          ],
+        })),
+      });
+    }
+
+    if (module === 'logs') {
+      const [logs, totalLogs, loginEvents] = await Promise.all([
+        SystemLog.find({})
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .populate('performedBy', 'firstName lastName email role')
+          .lean(),
+        SystemLog.countDocuments(),
+        SystemLog.countDocuments({ action: /login/i }),
+      ]);
+
+      return res.json({
+        title: 'System Logs',
+        stats: [
+          { label: 'Total Logs', value: totalLogs, tone: 'blue' },
+          { label: 'Login Events', value: loginEvents, tone: 'purple' },
+          { label: 'Recent Rows', value: logs.length, tone: 'slate' },
+        ],
+        columns: ['Action', 'Performed By', 'Role', 'IP Address', 'Date'],
+        rows: logs.map((log) => ({
+          id: log._id,
+          cells: [
+            log.action,
+            log.performedBy ? `${log.performedBy.firstName || ''} ${log.performedBy.lastName || ''}`.trim() || log.performedBy.email : 'System',
+            log.performedBy?.role || '-',
+            log.ipAddress || '-',
+            log.createdAt,
+          ],
+        })),
+      });
+    }
+
+    if (module === 'announcements') {
+      const [companies, users, recentLogs] = await Promise.all([
+        Company.countDocuments({ status: 'active' }),
+        User.countDocuments({ deletedAt: null, isActive: true }),
+        SystemLog.find({ action: /announcement/i }).sort({ createdAt: -1 }).limit(50).populate('performedBy', 'firstName lastName email').lean(),
+      ]);
+
+      return res.json({
+        title: 'Announcements',
+        stats: [
+          { label: 'Reachable Companies', value: companies, tone: 'blue' },
+          { label: 'Reachable Users', value: users, tone: 'emerald' },
+          { label: 'Sent Announcements', value: recentLogs.length, tone: 'purple' },
+        ],
+        columns: ['Announcement Activity', 'Sent By', 'Date'],
+        rows: recentLogs.map((log) => ({
+          id: log._id,
+          cells: [
+            log.action,
+            log.performedBy ? `${log.performedBy.firstName || ''} ${log.performedBy.lastName || ''}`.trim() || log.performedBy.email : 'System',
+            log.createdAt,
+          ],
+        })),
+        emptyTitle: 'No announcements have been sent yet.',
+        emptyDescription: 'Announcement history will appear here after messages are sent.',
+      });
+    }
+
+    if (module === 'support') {
+      const [tickets, openTickets, criticalTickets, resolvedTickets] = await Promise.all([
+        SupportTicket.find({})
+          .sort({ createdAt: -1 })
+          .limit(100)
+          .populate('companyId', 'companyName')
+          .populate('userId', 'firstName lastName email')
+          .lean(),
+        SupportTicket.countDocuments({ status: { $in: ['open', 'in_progress'] } }),
+        SupportTicket.countDocuments({ priority: 'critical', status: { $in: ['open', 'in_progress'] } }),
+        SupportTicket.countDocuments({ status: { $in: ['resolved', 'closed'] } }),
+      ]);
+
+      return res.json({
+        title: 'Support Tickets',
+        stats: [
+          { label: 'Open Tickets', value: openTickets, tone: openTickets ? 'amber' : 'emerald' },
+          { label: 'Critical Open', value: criticalTickets, tone: criticalTickets ? 'red' : 'emerald' },
+          { label: 'Resolved / Closed', value: resolvedTickets, tone: 'blue' },
+        ],
+        columns: ['Subject', 'Company', 'Raised By', 'Priority', 'Status', 'Created'],
+        rows: tickets.map((ticket) => ({
+          id: ticket._id,
+          cells: [
+            ticket.subject,
+            ticket.companyId?.companyName || '-',
+            ticket.userId ? `${ticket.userId.firstName || ''} ${ticket.userId.lastName || ''}`.trim() || ticket.userId.email : '-',
+            ticket.priority,
+            ticket.status,
+            ticket.createdAt,
+          ],
+        })),
+      });
+    }
+
+    if (module === 'settings') {
+      const [companies, users, projects, platformExpenses] = await Promise.all([
+        Company.countDocuments(),
+        User.countDocuments({ deletedAt: null }),
+        Project.countDocuments({ deletedAt: null }),
+        PlatformExpense.countDocuments(),
+      ]);
+
+      return res.json({
+        title: 'Settings',
+        stats: [
+          { label: 'Companies', value: companies, tone: 'blue' },
+          { label: 'Users', value: users, tone: 'emerald' },
+          { label: 'Projects', value: projects, tone: 'purple' },
+        ],
+        columns: ['Setting', 'Current Value', 'Status'],
+        rows: [
+          { id: 'platform-uptime', cells: ['Platform uptime', `${process.env.PLATFORM_UPTIME || 100}%`, 'active'] },
+          { id: 'currency', cells: ['Default currency', 'INR', 'active'] },
+          { id: 'expense-records', cells: ['Platform expense records', platformExpenses, 'active'] },
+        ],
+      });
+    }
+
+    res.status(404).json({ message: 'Admin module not found' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error loading admin module', error: error.message });
+  }
+};
+
 // @desc    Get dynamic Super Admin dashboard data
 // @route   GET /api/admin/dashboard
 // @access  Private/SuperAdmin
@@ -253,6 +457,10 @@ export const getDashboard = async (req, res) => {
       thisMonthExpenses,
       last30DaysExpenses,
       recentExpenses,
+      totalCompanyExpenses,
+      platformProjectRevenue,
+      last30DaysProjectRevenue,
+      previous30DaysProjectRevenue,
     ] = await Promise.all([
       Company.countDocuments(),
       Company.countDocuments({ status: 'active' }),
@@ -301,6 +509,22 @@ export const getDashboard = async (req, res) => {
         { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       PlatformExpense.find({}).sort({ date: -1 }).limit(5).populate('recordedBy', 'firstName lastName').lean(),
+      Expense.aggregate([
+        { $match: activeExpenseMatch() },
+        { $group: { _id: null, total: { $sum: expenseAmountExpression } } },
+      ]),
+      Project.aggregate([
+        { $match: { deletedAt: null } },
+        { $group: { _id: null, total: { $sum: recognizedProjectRevenueExpression } } },
+      ]),
+      Project.aggregate([
+        { $match: { deletedAt: null, updatedAt: { $gte: startOfLast30Days } } },
+        { $group: { _id: null, total: { $sum: recognizedProjectRevenueExpression } } },
+      ]),
+      Project.aggregate([
+        { $match: { deletedAt: null, updatedAt: { $gte: startOfPrevious30Days, $lt: startOfLast30Days } } },
+        { $group: { _id: null, total: { $sum: recognizedProjectRevenueExpression } } },
+      ]),
     ]);
 
     const companyIds = companies.map((company) => company._id);
@@ -335,14 +559,15 @@ export const getDashboard = async (req, res) => {
     }, {});
 
     const planRows = buildPlanRows(plans, companies);
-    const monthlyRevenue = sumAggregate(thisMonthRevenue) || calculateRecurringRevenue(planRows);
-    const previousRevenue = sumAggregate(previousMonthRevenue);
-    const last30Revenue = sumAggregate(last30DaysRevenue);
-    const previous30Revenue = sumAggregate(previous30DaysRevenue);
+    const monthlyRevenue = sumAggregate(platformProjectRevenue);
+    const previousRevenue = 0;
+    const last30Revenue = sumAggregate(last30DaysProjectRevenue);
+    const previous30Revenue = sumAggregate(previous30DaysProjectRevenue);
     const revenueGrowth = calculateGrowth(last30Revenue || monthlyRevenue, previous30Revenue || previousRevenue);
 
     const monthlyExpenses = sumAggregate(thisMonthExpenses);
-    const netProfit = monthlyRevenue - monthlyExpenses;
+    const totalCompanyExpenseValue = totalCompanyExpenses[0]?.total || 0;
+    const netProfit = monthlyRevenue - monthlyExpenses - totalCompanyExpenseValue;
 
     res.json({
       generatedAt: now,
@@ -359,6 +584,7 @@ export const getDashboard = async (req, res) => {
       financials: {
         revenue: monthlyRevenue,
         expenses: monthlyExpenses,
+        totalCompanyExpenses: totalCompanyExpenseValue,
         netProfit,
         recentExpenses: recentExpenses.map((exp) => ({
           id: exp._id,
@@ -368,7 +594,7 @@ export const getDashboard = async (req, res) => {
           date: exp.date,
         }))
       },
-      platformGrowth: buildMonthlyGrowth(monthlyCompanyRegistrations, totalCompanies, currentYear),
+      platformGrowth: buildMonthlyGrowth(monthlyCompanyRegistrations, currentYear, now.getMonth()),
       companiesByPlan: planRows,
       recentCompanies: recentCompanies.map((company) => {
         const key = company._id.toString();
@@ -410,7 +636,7 @@ export const getDashboard = async (req, res) => {
       })),
       alerts: [
         { key: 'pendingApprovals', label: 'company approvals pending', count: pendingApprovals, severity: 'warning' },
-        { key: 'overduePayments', label: 'subscription payments overdue', count: failedOrPendingPayments, severity: 'danger' },
+        { key: 'overduePayments', label: 'payments needing review', count: failedOrPendingPayments, severity: 'danger' },
         { key: 'criticalTickets', label: 'critical support tickets', count: supportCritical, severity: 'danger' },
         { key: 'companiesNearUserLimit', label: 'companies nearing user limit', count: countCompaniesNearUserLimit(companies, userCountByCompany), severity: 'warning' },
         { key: 'suspiciousLogins', label: 'suspicious login attempts', count: suspiciousLogins, severity: 'danger' },
@@ -479,6 +705,30 @@ const toCountMap = (rows) =>
   }, {});
 
 const sumAggregate = (rows) => rows?.[0]?.total || 0;
+const activeExpenseMatch = () => ({
+  deletedAt: null,
+  status: { $nin: ['rejected', 'cancelled'] },
+});
+const expenseAmountExpression = {
+  $cond: [
+    { $gt: ['$amount', 0] },
+    '$amount',
+    { $ifNull: ['$totalAmount', 0] },
+  ],
+};
+const recognizedProjectRevenueExpression = {
+  $cond: [
+    {
+      $or: [
+        { $eq: ['$status', 'completed'] },
+        { $gte: ['$progressPercentage', 100] },
+        { $gte: ['$progress', 100] },
+      ],
+    },
+    { $ifNull: ['$contractValue', 0] },
+    0,
+  ],
+};
 
 const calculateGrowth = (current, previous) => {
   if (!previous) {
@@ -516,16 +766,13 @@ const buildPlanRows = (plans, companies) => {
 const calculateRecurringRevenue = (planRows) =>
   planRows.reduce((total, plan) => total + plan.monthlyRevenue, 0);
 
-const buildMonthlyGrowth = (registrations, totalCompanies, year) => {
+const buildMonthlyGrowth = (registrations, year, currentMonthIndex) => {
   const monthCounts = new Map(registrations.map((row) => [row._id, row.count]));
-  const registeredThisYear = registrations.reduce((sum, row) => sum + row.count, 0);
-  let runningTotal = totalCompanies - registeredThisYear;
 
-  return Array.from({ length: 12 }, (_, index) => {
-    runningTotal += monthCounts.get(index + 1) || 0;
+  return Array.from({ length: currentMonthIndex + 1 }, (_, index) => {
     return {
       month: new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(year, index, 1)),
-      companies: runningTotal,
+      companies: monthCounts.get(index + 1) || 0,
     };
   });
 };

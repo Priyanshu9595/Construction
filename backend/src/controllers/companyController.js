@@ -66,6 +66,7 @@ export const updateCompanyInfo = async (req, res) => {
 export const addCompanyUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
+    const normalizedRole = role === 'project_manager' ? 'project_owner' : role;
     
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
@@ -77,9 +78,9 @@ export const addCompanyUser = async (req, res) => {
       lastName,
       email: email.toLowerCase(),
       password,
-      role,
+      role: normalizedRole,
       companyId: req.user.companyId,
-      status: 'active'
+      isActive: true
     });
 
     res.status(201).json(user);

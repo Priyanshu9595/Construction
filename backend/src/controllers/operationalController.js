@@ -36,7 +36,17 @@ export const getExpenses = async (req, res) => {
 
 export const createExpense = async (req, res) => {
   try {
-    const expense = await Expense.create({ ...req.body, projectId: req.params.projectId, companyId: req.user.companyId, createdBy: req.user._id });
+    const invoiceNumber = req.body.invoiceNumber || `EXP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const amount = Number(req.body.amount || req.body.totalAmount || 0);
+    const expense = await Expense.create({
+      ...req.body,
+      invoiceNumber,
+      amount,
+      totalAmount: Number(req.body.totalAmount || amount),
+      projectId: req.params.projectId,
+      companyId: req.user.companyId,
+      createdBy: req.user._id,
+    });
     res.status(201).json(expense);
   } catch (error) {
     res.status(400).json({ message: 'Error creating expense', error: error.message });

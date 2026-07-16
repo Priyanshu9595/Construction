@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCompany, getCompanies, getDashboard, getPlans, createPlan, updateCompany, deleteCompany, getPlatformExpenses, createPlatformExpense, deletePlatformExpense } from '../controllers/adminController.js';
+import { createCompany, getCompanies, getDashboard, getAdminModuleData, getPlans, createPlan, updateCompany, deleteCompany, getPlatformExpenses, createPlatformExpense, deletePlatformExpense } from '../controllers/adminController.js';
 import { protect, superOwnerOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(protect, superOwnerOnly);
 
 router.route('/dashboard').get(getDashboard);
+router.route('/modules/:module').get(getAdminModuleData);
 router.route('/companies').get(getCompanies).post(createCompany);
 router.route('/companies/:id').patch(updateCompany).delete(deleteCompany);
 router.route('/plans').get(getPlans).post(createPlan);
