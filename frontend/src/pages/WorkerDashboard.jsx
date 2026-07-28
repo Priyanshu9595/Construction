@@ -60,33 +60,7 @@ export default function WorkerDashboard() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-4 sm:p-6 pb-20">
-      {/* Header Profile Card */}
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-5 sm:p-6 text-white shadow-md">
-        <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-blue-600/20 to-transparent"></div>
-        <div className="absolute -top-4 -right-4 p-4 opacity-10 text-white">
-          <Briefcase size={100} />
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-1.5">
-            <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Namaste, {data.profile.name.split(" ")[0]}
-            </h1>
-            <span className="hidden sm:inline-flex items-center rounded-full bg-slate-800 border border-slate-700 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-300">
-              Labour Portal
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <HardHat size={16} className="text-blue-400" />{" "}
-              {data.profile.trade || "Worker"}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <InfoIcon size={16} className="text-blue-400" /> ID:{" "}
-              {data.profile.workerCode || "N/A"}
-            </span>
-          </div>
-        </div>
-      </div>
+
 
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-4">

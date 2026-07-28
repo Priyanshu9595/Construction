@@ -426,17 +426,12 @@ export default function MainLayout() {
             </div>
 
             <div className="mx-2 hidden h-6 w-px bg-slate-200 lg:block"></div>
-            <button
-              onClick={() =>
-                alert(
-                  "Help Center is under construction. It will be available soon!",
-                )
-              }
-              className="hidden items-center gap-2 rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 sm:flex"
-            >
-              <HelpCircle size={20} />
-              <span className="text-sm font-medium">Help</span>
-            </button>
+            <div className="hidden items-center gap-2 sm:flex pl-2">
+              <span className="text-sm font-bold text-slate-700">{userName}</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            </div>
           </div>
         </header>
 
