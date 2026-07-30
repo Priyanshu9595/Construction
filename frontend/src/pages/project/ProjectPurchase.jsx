@@ -77,10 +77,10 @@ export default function ProjectPurchase() {
                       </div>
                       <div>
                         <p className="font-extrabold text-slate-900">
-                          {po.poNumber || "Draft PO"}
+                          {po.name || po.purchaseOrderNumber || po.poNumber || "Draft PO"}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          Vendor: {po.vendorId?.name || "Unknown"}
+                          {po.purchaseOrderNumber || po.poNumber ? `PO: ${po.purchaseOrderNumber || po.poNumber} | ` : ""}Vendor: {po.vendorId?.name || "Unknown"}
                         </p>
                       </div>
                     </div>
@@ -122,7 +122,8 @@ export default function ProjectPurchase() {
 
 function AddModal({ projectId, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    poNumber: "",
+    name: "",
+    purchaseOrderNumber: "",
     totalAmount: "",
     status: "pending",
     poDate: new Date().toISOString().split("T")[0],
@@ -164,13 +165,25 @@ function AddModal({ projectId, onClose, onSuccess }) {
         </div>
         <div className="p-6 space-y-4">
           <label className="block text-sm font-bold text-slate-700">
+            PO Name / Title
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              placeholder="e.g. Cement Order for Block A"
+              className="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
+            />
+          </label>
+          <label className="block text-sm font-bold text-slate-700">
             PO Number *
             <input
               required
               type="text"
-              value={formData.poNumber}
+              value={formData.purchaseOrderNumber}
               onChange={(e) =>
-                setFormData({ ...formData, poNumber: e.target.value })
+                setFormData({ ...formData, purchaseOrderNumber: e.target.value })
               }
               className="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
             />
