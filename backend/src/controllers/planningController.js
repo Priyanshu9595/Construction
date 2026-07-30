@@ -17,8 +17,53 @@ import Expense from '../models/Expense.js';
 // ======================= PHASES =======================
 export const getPhases = async (req, res) => {
   try {
-    const phases = await ProjectPhase.find({ projectId: req.params.projectId, deletedAt: null }).sort({ plannedStartDate: 1 });
-    res.json(phases);
+    const phases = await ProjectPhase.find({ projectId: req.params.projectId, deletedAt: null }).lean().sort({ plannedStartDate: 1 });
+    
+    const tasks = await Task.find({ projectId: req.params.projectId, deletedAt: null }).populate('assignedUserIds', 'firstName lastName').lean();
+
+    const enrichedPhases = phases.map(phase => {
+      const phaseTasks = tasks.filter(t => t.phaseId?.toString() === phase._id.toString());
+      
+      let dynamicStatus = phase.status;
+      let dynamicTeam = phase.responsibleTeam;
+      
+      if (phaseTasks.length > 0) {
+        const allCompleted = phaseTasks.every(t => t.status === 'completed');
+        const anyInProgress = phaseTasks.some(t => ['in_progress', 'delayed', 'blocked'].includes(t.status));
+        
+        if (allCompleted) {
+          dynamicStatus = 'completed';
+        } else if (anyInProgress) {
+          dynamicStatus = 'in_progress';
+        } else if (dynamicStatus !== 'completed') {
+          dynamicStatus = 'not_started';
+        }
+        
+        if (!dynamicTeam) {
+          const teamMembers = new Set();
+          phaseTasks.forEach(t => {
+            if (t.assignedUserIds) {
+              t.assignedUserIds.forEach(user => {
+                if (user.firstName) {
+                  teamMembers.add(`${user.firstName} ${user.lastName || ''}`.trim());
+                }
+              });
+            }
+          });
+          if (teamMembers.size > 0) {
+            dynamicTeam = Array.from(teamMembers).join(', ');
+          }
+        }
+      }
+      
+      return {
+        ...phase,
+        status: dynamicStatus,
+        responsibleTeam: dynamicTeam
+      };
+    });
+
+    res.json(enrichedPhases);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching phases', error: error.message });
   }

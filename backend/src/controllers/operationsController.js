@@ -178,11 +178,37 @@ export const updateWorkerTaskStatus = async (req, res) => {
     );
     if (!task) return res.status(404).json({ message: 'Task not found or not assigned to you' });
 
-    if (updateData.status === 'in_progress' || updateData.status === 'completed' || task.status === 'in_progress' || task.status === 'completed') {
+    if (updateData.status === 'in_progress' || updateData.status === 'completed' || task.status === 'in_progress' || task.status === 'completed' || typeof progressPercentage === 'number') {
       const project = await Project.findById(task.projectId);
-      if (project && project.status === 'not_started') {
-        project.status = 'in_progress';
-        await project.save();
+      if (project) {
+        let changed = false;
+        
+        if (project.status === 'not_started' && (updateData.status === 'in_progress' || task.status === 'in_progress')) {
+          project.status = 'in_progress';
+          changed = true;
+        }
+
+        const result = await Task.aggregate([
+          { $match: { projectId: project._id, deletedAt: null } },
+          { $group: { _id: null, weightedDone: { $sum: { $multiply: ['$progressPercentage', '$weight'] } }, totalWeight: { $sum: '$weight' } } },
+        ]);
+        
+        const overallProgress = result[0]?.totalWeight ? Number((result[0].weightedDone / result[0].totalWeight).toFixed(1)) : 0;
+        
+        if (project.progressPercentage !== overallProgress) {
+          project.progressPercentage = overallProgress;
+          project.progress = overallProgress;
+          changed = true;
+        }
+
+        if (overallProgress >= 100 && project.status !== 'completed') {
+          project.status = 'completed';
+          changed = true;
+        }
+
+        if (changed) {
+          await project.save();
+        }
       }
     }
 
