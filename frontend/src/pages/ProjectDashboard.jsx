@@ -100,10 +100,10 @@ export default function ProjectDashboard() {
           [
             "Overall Progress",
             `${summary.overallProgress}%`,
-            "text-emerald-600",
+            "text-slate-900",
           ],
-          ["Total Expenses", formatINR(summary.totalExpenses), "text-red-600"],
-          ["Budget Used", `${summary.budgetUsed}%`, "text-blue-600"],
+          ["Total Expenses", formatINR(summary.totalExpenses), "text-slate-900"],
+          ["Budget Used", `${summary.budgetUsed}%`, "text-slate-900"],
           [
             "Days Passed",
             summary.totalDays
@@ -114,12 +114,12 @@ export default function ProjectDashboard() {
           [
             "Delay",
             summary.delayDays ? `${summary.delayDays} Days` : "On Schedule",
-            summary.delayDays ? "text-red-600" : "text-emerald-600",
+            "text-slate-900",
           ],
-          ["Labour Present", summary.labourPresentToday, "text-purple-600"],
-          ["Pending Tasks", summary.pendingTasks, "text-orange-600"],
-          ["Open Issues", summary.openIssues, "text-red-600"],
-          ["Pending Approvals", summary.pendingApprovals, "text-amber-600"],
+          ["Labour Present", summary.labourPresentToday, "text-slate-900"],
+          ["Pending Tasks", summary.pendingTasks, "text-slate-900"],
+          ["Open Issues", summary.openIssues, "text-slate-900"],
+          ["Pending Approvals", summary.pendingApprovals, "text-slate-900"],
         ].map(([label, value, color]) => (
           <div
             key={label}

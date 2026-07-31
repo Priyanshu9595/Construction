@@ -13,6 +13,7 @@ import Worker from '../models/Worker.js';
 import SalarySlip from '../models/SalarySlip.js';
 import Attendance from '../models/Attendance.js';
 import Expense from '../models/Expense.js';
+import { sendCredentialsEmail } from '../utils/emailService.js';
 
 // ======================= PHASES =======================
 export const getPhases = async (req, res) => {
@@ -204,6 +205,8 @@ export const createProjectWorker = async (req, res) => {
       employeeCode,
       isActive: true
     });
+
+    await sendCredentialsEmail(user.email, password, user.firstName, user.role);
 
     res.status(201).json({
       _id: user._id,

@@ -100,12 +100,9 @@ export default function AdminLayout() {
       ) : null}
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] shrink-0 flex-col bg-[#061b2d] text-slate-300 shadow-2xl shadow-slate-950/15 transition-transform duration-200 lg:static lg:z-20 lg:w-[240px] lg:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] shrink-0 flex-col bg-slate-900 text-slate-300 shadow-2xl shadow-slate-950/15 transition-transform duration-200 lg:static lg:z-20 lg:w-[240px] lg:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="px-5 py-5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-md bg-[#f4c430] text-[#061b2d] flex items-center justify-center">
-            <Building2 size={17} strokeWidth={2.5} />
-          </div>
           <h1 className="text-lg font-bold text-white tracking-tight">
             BuildFlow
           </h1>
@@ -124,8 +121,8 @@ export default function AdminLayout() {
                 onClick={() => setNavOpen(false)}
                 className={`flex items-center gap-3 py-2.5 px-3 rounded-md text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-[#2f86ef] text-white shadow-md shadow-blue-950/20"
-                    : "hover:bg-white/8 hover:text-white"
+                    ? "bg-blue-500/15 text-blue-500 font-bold"
+                    : "hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {item.icon} {item.name}
@@ -156,25 +153,6 @@ export default function AdminLayout() {
             <LayoutDashboard size={20} />
           </button>
 
-          <div className="hidden flex-1 sm:flex sm:max-w-xl">
-            <div className="relative w-full">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Search companies, users or projects..."
-                aria-label="Search companies, users or projects"
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    handleGlobalSearch(event.currentTarget.value);
-                  }
-                }}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#f6f8fc] border border-slate-200 rounded-md text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none"
-              />
-            </div>
-          </div>
 
           <div className="ml-auto flex items-center gap-3 lg:gap-5">
             <div className="flex items-center gap-3 text-slate-400">

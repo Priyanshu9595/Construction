@@ -1,6 +1,7 @@
 import Project from '../models/Project.js';
 import SystemLog from '../models/SystemLog.js';
 import User from '../models/User.js';
+import { sendCredentialsEmail } from '../utils/emailService.js';
 
 // @desc    Get all projects for a company
 // @route   GET /api/company/projects
@@ -58,6 +59,8 @@ export const createProject = async (req, res) => {
         isActive: true,
       });
       finalPmId = newPm._id;
+
+      await sendCredentialsEmail(newPm.email, pmPassword, newPm.firstName, newPm.role);
     }
 
     const project = await Project.create({

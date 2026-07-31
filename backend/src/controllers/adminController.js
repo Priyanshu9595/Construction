@@ -7,6 +7,7 @@ import SystemLog from '../models/SystemLog.js';
 import User from '../models/User.js';
 import PlatformExpense from '../models/PlatformExpense.js';
 import Expense from '../models/Expense.js';
+import { sendCredentialsEmail } from '../utils/emailService.js';
 
 const PLAN_COLORS = ['#2563eb', '#f97316', '#7c3aed', '#16a34a', '#0891b2', '#64748b'];
 
@@ -75,6 +76,8 @@ export const createCompany = async (req, res) => {
       department: 'Management',
     });
 
+    await sendCredentialsEmail(owner.email, ownerPassword || '123456', owner.firstName, owner.role);
+
     company.ownerId = owner._id;
     await company.save();
 
@@ -140,6 +143,8 @@ export const updateCompany = async (req, res) => {
           designation: 'Company Owner',
           department: 'Management',
         });
+
+        await sendCredentialsEmail(owner.email, req.body.ownerPassword || '123456', owner.firstName, owner.role);
       }
 
       company.ownerId = owner._id;

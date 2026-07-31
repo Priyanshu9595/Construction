@@ -35,18 +35,18 @@ export default function SupervisorDashboard() {
 
   const { summary, attendance, trades, allocations } = query.data;
   const cards = [
-    ["Total Labour", summary.totalLabourAssigned, Users, "text-blue-600"],
-    ["Present Today", summary.presentToday, CheckCircle2, "text-emerald-600"],
-    ["Absent Today", summary.absentToday, AlertTriangle, "text-red-600"],
-    ["On Leave", summary.onLeave, Clock, "text-amber-600"],
-    ["Late Workers", summary.lateWorkers, Clock, "text-orange-600"],
-    ["Overtime", summary.overtimeWorkers, Clock, "text-purple-600"],
+    ["Total Labour", summary.totalLabourAssigned, Users, "text-slate-900"],
+    ["Present Today", summary.presentToday, CheckCircle2, "text-slate-900"],
+    ["Absent Today", summary.absentToday, AlertTriangle, "text-slate-900"],
+    ["On Leave", summary.onLeave, Clock, "text-slate-900"],
+    ["Late Workers", summary.lateWorkers, Clock, "text-slate-900"],
+    ["Overtime", summary.overtimeWorkers, Clock, "text-slate-900"],
     ["Active Tasks", summary.activeTasks, HardHat, "text-slate-900"],
     [
       "Shortage Alerts",
       summary.labourShortageAlerts,
       AlertTriangle,
-      "text-red-600",
+      "text-slate-900",
     ],
   ];
   const colors = ["#22c55e", "#ef4444", "#f59e0b", "#3b82f6", "#a855f7"];

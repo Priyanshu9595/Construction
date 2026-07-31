@@ -2,6 +2,7 @@ import Client from '../models/Client.js';
 import Contractor from '../models/Contractor.js';
 import Company from '../models/Company.js';
 import User from '../models/User.js';
+import { sendCredentialsEmail } from '../utils/emailService.js';
 
 // Clients
 export const getClients = async (req, res) => {
@@ -82,6 +83,8 @@ export const addCompanyUser = async (req, res) => {
       companyId: req.user.companyId,
       isActive: true
     });
+
+    await sendCredentialsEmail(user.email, password, user.firstName, user.role);
 
     res.status(201).json(user);
   } catch (error) {

@@ -19,6 +19,8 @@ import {
   AlertTriangle,
   ClipboardCheck,
   ShoppingCart,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 export default function MainLayout() {
@@ -27,6 +29,11 @@ export default function MainLayout() {
   const [navOpen, setNavOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
+
+  const toggleSection = (name) => {
+    setExpandedSections((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem("user") || "null");
@@ -112,75 +119,107 @@ export default function MainLayout() {
           icon: <LayoutDashboard size={20} />,
         },
         {
-          name: "Phases",
-          path: `/project-owner/${projectId}/phases`,
+          name: "Planning & Control",
           icon: <Layers size={20} />,
+          subItems: [
+            {
+              name: "Phases",
+              path: `/project-owner/${projectId}/phases`,
+              icon: <Layers size={20} />,
+            },
+            {
+              name: "BOQ",
+              path: `/project-owner/${projectId}/boq`,
+              icon: <FileSpreadsheet size={20} />,
+            },
+            {
+              name: "Budget",
+              path: `/project-owner/${projectId}/budget`,
+              icon: <Wallet size={20} />,
+            },
+          ]
         },
         {
-          name: "Tasks",
-          path: `/project-owner/${projectId}/tasks`,
-          icon: <ListTodo size={20} />,
-        },
-        {
-          name: "Workers",
-          path: `/project-owner/${projectId}/workers`,
-          icon: <Users size={20} />,
-        },
-        {
-          name: "BOQ",
-          path: `/project-owner/${projectId}/boq`,
-          icon: <FileSpreadsheet size={20} />,
-        },
-        {
-          name: "Budget",
-          path: `/project-owner/${projectId}/budget`,
-          icon: <Wallet size={20} />,
-        },
-        {
-          name: "Site Execution",
-          path: `/project-owner/${projectId}/sites`,
+          name: "Execution",
           icon: <HardHat size={20} />,
+          subItems: [
+            {
+              name: "Tasks",
+              path: `/project-owner/${projectId}/tasks`,
+              icon: <ListTodo size={20} />,
+            },
+            {
+              name: "Workers",
+              path: `/project-owner/${projectId}/workers`,
+              icon: <Users size={20} />,
+            },
+            {
+              name: "Site Execution",
+              path: `/project-owner/${projectId}/sites`,
+              icon: <HardHat size={20} />,
+            },
+          ]
         },
       ];
 
+      const resourceItems = [];
       if (
         userPermissions.includes("finance.manage") ||
         userPermissions.includes("finance.view")
       ) {
-        items.push({
+        resourceItems.push({
           name: "Finance",
           path: `/project-owner/${projectId}/finance/expenses`,
           icon: <Wallet size={20} />,
         });
       }
       if (userPermissions.includes("purchase.manage")) {
-        items.push({
+        resourceItems.push({
           name: "Purchase",
           path: `/project-owner/${projectId}/purchase/orders`,
           icon: <ShoppingCart size={20} />,
         });
       }
       if (userPermissions.includes("inventory.manage")) {
-        items.push({
+        resourceItems.push({
           name: "Store Inventory",
           path: `/project-owner/${projectId}/store/inventory`,
           icon: <Building2 size={20} />,
         });
       }
-      if (userPermissions.includes("quality.manage")) {
+
+      if (resourceItems.length > 0) {
         items.push({
+          name: "Resources & Finance",
+          icon: <Wallet size={20} />,
+          subItems: resourceItems,
+        });
+      }
+
+      const complianceItems = [];
+      if (userPermissions.includes("quality.manage")) {
+        complianceItems.push({
           name: "Quality",
           path: `/project-owner/${projectId}/quality/inspections`,
           icon: <ClipboardCheck size={20} />,
         });
       }
       if (userPermissions.includes("safety.manage")) {
-        items.push({
+        complianceItems.push({
           name: "Safety",
           path: `/project-owner/${projectId}/safety/incidents`,
           icon: <AlertTriangle size={20} />,
         });
       }
+
+      if (complianceItems.length > 0) {
+        items.push({
+          name: "Compliance",
+          icon: <ClipboardCheck size={20} />,
+          subItems: complianceItems,
+        });
+      }
+
       return items;
     }
 
@@ -233,16 +272,65 @@ export default function MainLayout() {
         className={`fixed inset-y-0 left-0 z-40 flex w-[280px] shrink-0 flex-col bg-[#0f172a] text-slate-400 shadow-2xl transition-transform duration-200 lg:static lg:z-20 lg:w-[260px] lg:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="p-6 pb-6 flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Building2 className="text-white" size={18} />
-          </div>
           <h1 className="text-xl font-bold text-white tracking-tight">
             BuildFlow
           </h1>
         </div>
 
         <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto custom-scrollbar">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
+            if (item.subItems) {
+              const isExpanded = expandedSections[item.name];
+              const hasActiveChild = item.subItems.some(
+                (sub) =>
+                  location.pathname === sub.path ||
+                  (sub.path !== "/" && location.pathname.startsWith(sub.path))
+              );
+              return (
+                <div key={item.name} className="flex flex-col mb-1.5">
+                  <button
+                    onClick={() => toggleSection(item.name)}
+                    className={`flex items-center justify-between w-full gap-3 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${hasActiveChild || isExpanded
+                        ? "bg-slate-800/80 text-white shadow-sm"
+                        : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="shrink-0">{item.icon}</div>
+                      <span className="text-left text-sm leading-tight whitespace-nowrap">{item.name}</span>
+                    </div>
+                    <div className="shrink-0 transition-transform duration-200">
+                      {isExpanded ? <ChevronDown size={16} className="text-slate-400" /> : <ChevronRight size={16} className="text-slate-500" />}
+                    </div>
+                  </button>
+                  {isExpanded && (
+                    <div className="flex flex-col gap-1 pl-3 ml-6 mt-1.5 border-l border-slate-700/60">
+                      {item.subItems.map((subItem) => {
+                        const isActive =
+                          location.pathname === subItem.path ||
+                          (subItem.path !== "/" &&
+                            location.pathname.startsWith(subItem.path));
+                        return (
+                          <Link
+                            key={subItem.path}
+                            to={subItem.path}
+                            onClick={() => setNavOpen(false)}
+                            className={`flex items-center py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              isActive
+                                ? "bg-blue-500/15 text-blue-500 font-bold"
+                                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                            }`}
+                          >
+                            {subItem.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             const isActive =
               location.pathname === item.path ||
               (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -251,13 +339,14 @@ export default function MainLayout() {
                 key={item.path}
                 to={item.path}
                 onClick={() => setNavOpen(false)}
-                className={`flex items-center gap-3 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 ${
+                className={`flex items-center gap-3 py-2.5 px-4 rounded-lg font-medium transition-all duration-200 mb-1.5 ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
-                    : "hover:bg-slate-800 hover:text-slate-200"
+                    ? "bg-blue-500/15 text-blue-500 font-bold"
+                    : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
                 }`}
               >
-                {item.icon} {item.name}
+                <div className="shrink-0">{item.icon}</div>
+                <span className="text-left text-sm leading-tight whitespace-nowrap">{item.name}</span>
               </Link>
             );
           })}
@@ -300,17 +389,7 @@ export default function MainLayout() {
           >
             <LayoutDashboard size={20} />
           </button>
-          <div className="relative hidden w-full max-w-md sm:block">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search projects, tasks, or users..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg text-sm transition-all"
-            />
-          </div>
+
 
           <div className="ml-auto flex items-center gap-2 lg:gap-4 relative z-20">
             {/* Notifications Dropdown */}
