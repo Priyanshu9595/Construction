@@ -208,19 +208,19 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-[#ffd000] py-20 px-6">
+      <section className="bg-[#0a0a0a] border-t border-zinc-800 py-20 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
-            <h2 className="text-4xl md:text-6xl font-black text-black tracking-tighter uppercase leading-none">
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
               Ready to sync
               <br />
               projects?
             </h2>
-            <div className="w-24 h-1 bg-black mt-8"></div>
+            <div className="w-24 h-1 bg-[#ffd000] mt-8"></div>
           </div>
           <Link
             to="/login"
-            className="text-black font-black uppercase tracking-wider text-xl hover:opacity-70 transition-opacity"
+            className="text-[#ffd000] font-black uppercase tracking-wider text-xl hover:text-yellow-400 transition-colors"
           >
             Get Started
           </Link>
