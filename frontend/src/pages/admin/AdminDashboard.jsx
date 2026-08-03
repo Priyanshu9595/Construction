@@ -228,7 +228,7 @@ export default function AdminDashboard() {
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     {card.label}
                   </span>
-                  <span className="text-[22px] font-black leading-none tracking-tight text-slate-900">
+                  <span className="text-[22px] font-bold leading-none tracking-tight text-slate-900">
                     {card.value.toLocaleString("en-IN")}
                   </span>
                 </div>

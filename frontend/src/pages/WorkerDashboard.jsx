@@ -363,7 +363,7 @@ function InfoCard({ icon: Icon, label, value, color, bg }) {
           <Icon size={14} strokeWidth={2.5} />
         </div>
       </div>
-      <span className="text-[22px] font-black leading-none tracking-tight text-slate-900 truncate">
+      <span className="text-[22px] font-bold leading-none tracking-tight text-slate-900 truncate">
         {value}
       </span>
     </div>

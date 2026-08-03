@@ -109,7 +109,7 @@ export default function ExecutiveDashboard() {
                 </span>
                 <Icon className={kpi.color} size={16} />
               </div>
-              <span className={`text-[22px] font-black leading-none tracking-tight ${kpi.color}`}>
+              <span className={`text-[22px] font-bold leading-none tracking-tight ${kpi.color}`}>
                 {kpi.value}
               </span>
             </div>

@@ -128,7 +128,7 @@ export default function ProjectDashboard() {
             <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
               {label}
             </span>
-            <span className={`text-[22px] font-black leading-none tracking-tight ${color}`}>
+            <span className={`text-[22px] font-bold leading-none tracking-tight ${color}`}>
               {value}
             </span>
           </div>
