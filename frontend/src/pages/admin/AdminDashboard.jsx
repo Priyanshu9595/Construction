@@ -655,7 +655,7 @@ function QuickActions({ onAction }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 className="text-lg font-extrabold text-slate-950">Quick Actions</h2>
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
         {actions.map(([ActionIcon, label]) => (
           <button
             key={label}

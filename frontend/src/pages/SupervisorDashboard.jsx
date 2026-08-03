@@ -93,7 +93,8 @@ export default function SupervisorDashboard() {
           </div>
         </Panel>
         <Panel title="Labour by Trade" className="xl:col-span-2">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-sm">
             <thead>
               <tr className="border-b text-xs uppercase text-slate-500">
                 <th className="py-2 text-left">Trade</th>
@@ -119,6 +120,7 @@ export default function SupervisorDashboard() {
               ))}
             </tbody>
           </table>
+</div>
         </Panel>
       </div>
       <Panel title="Labour Allocation">

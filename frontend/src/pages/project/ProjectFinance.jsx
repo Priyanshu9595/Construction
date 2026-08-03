@@ -99,7 +99,8 @@ export default function ProjectFinance() {
             No expenses logged yet.
           </div>
         ) : (
-          <table className="w-full table-fixed text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full table-fixed text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs font-extrabold uppercase tracking-wider text-slate-500">
               <tr>
                 <th className="w-[42%] px-6 py-4">Expense Details</th>
@@ -158,6 +159,7 @@ export default function ProjectFinance() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -243,7 +245,7 @@ function AddModal({ projectId, onClose, onSuccess }) {
               className="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
             />
           </label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Amount (₹) *
               <input

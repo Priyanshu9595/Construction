@@ -72,7 +72,8 @@ export default function ProjectInventory() {
             No inventory records found.
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">Material Details</th>
@@ -126,6 +127,7 @@ export default function ProjectInventory() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 

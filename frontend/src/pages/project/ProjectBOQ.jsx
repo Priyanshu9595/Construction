@@ -156,7 +156,8 @@ export default function ProjectBOQ() {
             No BOQ items added yet.
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">Item Name & Details</th>
@@ -268,6 +269,7 @@ export default function ProjectBOQ() {
               })}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -362,7 +364,7 @@ function BOQModal({ projectId, initialData, onClose, onSuccess }) {
           </h2>
         </div>
         <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Item Name *
               <input
@@ -387,7 +389,7 @@ function BOQModal({ projectId, initialData, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Quantity *
               <input
@@ -428,7 +430,7 @@ function BOQModal({ projectId, initialData, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Link Phase
               <select

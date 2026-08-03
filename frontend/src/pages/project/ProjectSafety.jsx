@@ -55,7 +55,8 @@ export default function ProjectSafety() {
             No safety incidents reported. Safe working!
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">Incident Details</th>
@@ -118,6 +119,7 @@ export default function ProjectSafety() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -190,7 +192,7 @@ function AddModal({ projectId, onClose, onSuccess }) {
               rows={3}
             ></textarea>
           </label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Severity
               <select

@@ -55,7 +55,8 @@ export default function ProjectPurchase() {
             No purchase orders created yet.
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">PO Number & Vendor</th>
@@ -103,6 +104,7 @@ export default function ProjectPurchase() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -188,7 +190,7 @@ function AddModal({ projectId, onClose, onSuccess }) {
               className="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
             />
           </label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Total Amount (₹) *
               <input

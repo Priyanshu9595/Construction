@@ -49,7 +49,8 @@ export default function CompanyUsers() {
             No users found.
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">User</th>
@@ -99,6 +100,7 @@ export default function CompanyUsers() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -156,7 +158,7 @@ function AddModal({ onClose, onSuccess }) {
           </h2>
         </div>
         <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               First Name *
               <input

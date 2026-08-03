@@ -157,6 +157,15 @@ export default function AdminLayout() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
+        {!isDashboard && (
+          <button
+            onClick={() => setNavOpen(true)}
+            className="absolute top-4 left-4 z-10 rounded-lg p-2 bg-white shadow-sm border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden"
+            aria-label="Open navigation"
+          >
+            <LayoutDashboard size={20} />
+          </button>
+        )}
         {/* Header */}
         {isDashboard && (
           <header className="z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
@@ -201,7 +210,7 @@ export default function AdminLayout() {
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto bg-slate-50 custom-scrollbar">
           <div className="mx-auto max-w-[1500px]">
-            <div className="p-4 sm:p-5 lg:p-6">
+            <div className={`p-4 sm:p-5 lg:p-6 ${!isDashboard ? 'pt-16 sm:pt-5 lg:pt-6' : ''}`}>
               <Outlet />
             </div>
           </div>

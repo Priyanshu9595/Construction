@@ -55,7 +55,8 @@ export default function ProjectTasks() {
             No tasks defined yet.
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">Task Name</th>
@@ -169,6 +170,7 @@ export default function ProjectTasks() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -263,7 +265,7 @@ function AddTaskModal({ projectId, onClose, onSuccess }) {
           </h2>
         </div>
         <div className="p-6 space-y-4 overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Task Title *
               <input
@@ -288,7 +290,7 @@ function AddTaskModal({ projectId, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Phase *
               <select
@@ -319,7 +321,7 @@ function AddTaskModal({ projectId, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Start Date
               <input
@@ -347,7 +349,7 @@ function AddTaskModal({ projectId, onClose, onSuccess }) {
             <h4 className="font-bold text-slate-900 text-sm">
               Resource Planning (Expected costs)
             </h4>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <label className="block text-xs font-bold text-slate-700">
                 Labour (₹)
                 <input

@@ -64,7 +64,8 @@ export default function ProjectWorkers() {
             No workers found in this project.
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
             <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="px-6 py-4">Worker Profile</th>
@@ -137,6 +138,7 @@ export default function ProjectWorkers() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
@@ -237,7 +239,7 @@ function AddWorkerModal({ projectId, onClose, onSuccess }) {
           </p>
         </div>
         <div className="p-6 space-y-4 overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               First Name *
               <input
@@ -263,7 +265,7 @@ function AddWorkerModal({ projectId, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Email (for Login) *
               <input
@@ -290,7 +292,7 @@ function AddWorkerModal({ projectId, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Trade / Profession
               <input
@@ -467,7 +469,7 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
           </p>
         </div>
         <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Work Date
               <input
@@ -501,7 +503,7 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Gross Salary (₹)
               <input
@@ -649,7 +651,8 @@ function WorkerPaymentHistoryModal({ projectId, worker, onClose }) {
               No payment history found for this worker.
             </div>
           ) : (
-            <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
               <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider font-extrabold">
                 <tr>
                   <th className="px-6 py-4">Period</th>
@@ -686,6 +689,7 @@ function WorkerPaymentHistoryModal({ projectId, worker, onClose }) {
                 ))}
               </tbody>
             </table>
+</div>
           )}
         </div>
 

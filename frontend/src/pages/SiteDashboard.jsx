@@ -149,7 +149,7 @@ export default function SiteDashboard() {
         </Panel>
 
         <Panel title="Site Photos" className="xl:col-span-2">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-4">
             {data.photos.map((photo) => (
               <div
                 key={photo._id}
@@ -171,7 +171,8 @@ export default function SiteDashboard() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Panel title="Today's Tasks">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+<table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-500">
                 <th className="pb-3 text-left">Task</th>
@@ -198,6 +199,7 @@ export default function SiteDashboard() {
               ))}
             </tbody>
           </table>
+</div>
           {!data.tasks.length ? (
             <Empty text="No tasks assigned to this site." />
           ) : null}

@@ -91,7 +91,8 @@ export default function AdminModulePage({ module, title, subtitle }) {
       >
         {rows.length ? (
           <TableShell>
-            <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto">
+<table className="w-full text-left text-sm">
               <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   {query.data.columns.map((column) => (
@@ -119,6 +120,7 @@ export default function AdminModulePage({ module, title, subtitle }) {
                 ))}
               </tbody>
             </table>
+</div>
           </TableShell>
         ) : (
           <EmptyState

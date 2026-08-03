@@ -365,7 +365,7 @@ function AddProjectModal({ onClose, onSuccess }) {
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Project Name *
               <input
@@ -403,7 +403,7 @@ function AddProjectModal({ onClose, onSuccess }) {
               </div>
 
               {formData.isCreatingPM ? (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="block text-sm font-bold text-slate-700">
                     First Name *
                     <input
@@ -477,7 +477,7 @@ function AddProjectModal({ onClose, onSuccess }) {
               )}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Client Name
               <input
@@ -503,7 +503,7 @@ function AddProjectModal({ onClose, onSuccess }) {
               />
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Estimated Budget
               <div className="relative mt-1.5">
@@ -545,7 +545,7 @@ function AddProjectModal({ onClose, onSuccess }) {
               </p>
             </label>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block text-sm font-bold text-slate-700">
               Expected Profit
               <div className="relative mt-1.5">

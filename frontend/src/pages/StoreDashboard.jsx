@@ -51,7 +51,8 @@ export default function StoreDashboard() {
       </div>
       <div className="rounded-lg border bg-white p-5 shadow-sm">
         <h2 className="mb-4 font-extrabold">Stock Overview</h2>
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+<table className="w-full text-sm">
           <thead>
             <tr className="border-b text-xs uppercase text-slate-500">
               <th className="py-2 text-left">Material</th>
@@ -75,6 +76,7 @@ export default function StoreDashboard() {
             ))}
           </tbody>
         </table>
+</div>
       </div>
     </div>
   );

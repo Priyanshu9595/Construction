@@ -388,7 +388,16 @@ export default function MainLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-50">
+      <main className="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
+        {!isDashboard && (
+          <button
+            onClick={() => setNavOpen(true)}
+            className="absolute top-4 left-4 z-10 rounded-lg p-2 bg-white shadow-sm border border-slate-200 text-slate-500 hover:bg-slate-50 lg:hidden"
+            aria-label="Open navigation"
+          >
+            <LayoutDashboard size={20} />
+          </button>
+        )}
         {/* Top Header */}
         {isDashboard && (
           <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
@@ -520,7 +529,7 @@ export default function MainLayout() {
 
         {/* Page Content */}
         <div className="flex-1 overflow-auto custom-scrollbar">
-          <div className="mx-auto w-full max-w-[1500px] p-4 sm:p-5 lg:p-6">
+          <div className={`mx-auto w-full max-w-[1500px] p-4 sm:p-5 lg:p-6 ${!isDashboard ? 'pt-16 sm:pt-5 lg:pt-6' : ''}`}>
             <Outlet />
           </div>
         </div>

@@ -191,7 +191,7 @@ export default function ExecutiveDashboard() {
           <h2 className="mb-4 text-base font-extrabold text-slate-900">
             Company Overview
           </h2>
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xl:grid-cols-3">
             {[
               ["Total Budget", financial.totalBudget],
               ["Total Expenses", financial.totalExpenses],
