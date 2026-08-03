@@ -45,6 +45,19 @@ export default function MainLayout() {
     : "Admin User";
   const userRole = user?.role || "company_owner";
   const userPermissions = user?.permissions || [];
+  const displayRole = user?.role
+    ? user.role.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+    : "Company Owner";
+  const userInitials =
+    userName
+      .split(" ")
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase() || "AU";
+
+  const isDashboard = location.pathname.endsWith('/dashboard');
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -352,36 +365,33 @@ export default function MainLayout() {
           })}
         </nav>
 
-        <div className="p-4 mt-auto">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition-colors group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center border border-slate-600 text-sm font-semibold text-white">
-                {userName.charAt(0)}
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-sm font-medium text-slate-200 leading-tight">
-                  {userName}
-                </span>
-                <span className="text-xs text-slate-500 mt-0.5">
-                  {userRole.replace("_", " ").toUpperCase()}
-                </span>
-              </div>
+        <div className="p-3 border-t border-white/10 mt-auto">
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group">
+            <div className="w-9 h-9 shrink-0 rounded-full overflow-hidden border border-white/10 transition-colors flex items-center justify-center bg-[#f3efff] text-[#7c5bd6] font-bold text-sm">
+              {userInitials}
             </div>
-            <LogOut
-              size={16}
-              className="text-slate-500 group-hover:text-red-400 transition-colors"
-            />
-          </button>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold text-slate-200 leading-none group-hover:text-white transition-colors truncate">
+                {userName}
+              </p>
+              <p className="text-xs text-slate-400 mt-1 truncate">{displayRole}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Log Out"
+              className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors shrink-0"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 bg-slate-50">
         {/* Top Header */}
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
+        {isDashboard && (
+          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
           <button
             onClick={() => setNavOpen(true)}
             className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
@@ -504,15 +514,9 @@ export default function MainLayout() {
               )}
             </div>
 
-            <div className="mx-2 hidden h-6 w-px bg-slate-200 lg:block"></div>
-            <div className="hidden items-center gap-2 sm:flex pl-2">
-              <span className="text-sm font-bold text-slate-700">{userName}</span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            </div>
           </div>
         </header>
+        )}
 
         {/* Page Content */}
         <div className="flex-1 overflow-auto custom-scrollbar">

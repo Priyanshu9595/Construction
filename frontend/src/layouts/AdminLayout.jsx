@@ -42,6 +42,8 @@ export default function AdminLayout() {
       .substring(0, 2)
       .toUpperCase() || "SA";
 
+  const isDashboard = location.pathname.endsWith('/dashboard');
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -132,19 +134,32 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-3 border-t border-white/10 mt-auto">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 py-2.5 px-3 rounded-md hover:bg-red-500/10 hover:text-red-300 text-slate-300 transition-colors text-sm font-semibold"
-          >
-            <LogOut size={20} /> Log Out
-          </button>
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group">
+            <div className="w-9 h-9 shrink-0 rounded-full overflow-hidden border border-white/10 transition-colors flex items-center justify-center bg-[#f3efff] text-[#7c5bd6] font-bold text-sm">
+              {userInitials}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold text-slate-200 leading-none group-hover:text-white transition-colors truncate">
+                {userName}
+              </p>
+              <p className="text-xs text-slate-400 mt-1 truncate">{userRole}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Log Out"
+              className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors shrink-0"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
         {/* Header */}
-        <header className="z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
+        {isDashboard && (
+          <header className="z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
           <button
             onClick={() => setNavOpen(true)}
             className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
@@ -179,24 +194,9 @@ export default function AdminLayout() {
                 <HelpCircle size={20} />
               </button>
             </div>
-            <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-            <div className="flex cursor-pointer items-center gap-3 group">
-              <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-200 group-hover:border-[#7c5bd6] transition-colors flex items-center justify-center bg-[#f3efff] text-[#7c5bd6] font-bold text-sm">
-                {userInitials}
-              </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-slate-700 leading-none group-hover:text-[#7c5bd6] transition-colors">
-                  {userName}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">{userRole}</p>
-              </div>
-              <ChevronDown
-                size={16}
-                className="text-slate-400 hidden sm:block"
-              />
-            </div>
           </div>
         </header>
+        )}
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto bg-slate-50 custom-scrollbar">
