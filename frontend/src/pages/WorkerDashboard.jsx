@@ -352,18 +352,20 @@ async function workerGet(path) {
 
 function InfoCard({ icon: Icon, label, value, color, bg }) {
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40 transition-transform hover:-translate-y-1">
-      <div
-        className={`w-12 h-12 rounded-2xl ${bg} ${color} flex items-center justify-center mb-4`}
-      >
-        <Icon size={24} strokeWidth={2.5} />
+    <div className="flex h-full flex-col justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          {label}
+        </span>
+        <div
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${bg} ${color}`}
+        >
+          <Icon size={14} strokeWidth={2.5} />
+        </div>
       </div>
-      <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-        {label}
-      </p>
-      <p className="mt-1.5 text-2xl font-black text-slate-900 truncate">
+      <span className="text-[22px] font-black leading-none tracking-tight text-slate-900 truncate">
         {value}
-      </p>
+      </span>
     </div>
   );
 }

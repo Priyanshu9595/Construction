@@ -215,31 +215,31 @@ export default function AdminDashboard() {
         />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+      <section className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="group relative flex min-h-[136px] flex-col justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              className="group relative flex h-full flex-col justify-center gap-1.5 overflow-hidden rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="relative z-10 flex items-start justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     {card.label}
-                  </p>
-                  <p className="mt-3 break-words text-3xl font-extrabold tracking-tight text-slate-900">
+                  </span>
+                  <span className="text-[22px] font-black leading-none tracking-tight text-slate-900">
                     {card.value.toLocaleString("en-IN")}
-                  </p>
+                  </span>
                 </div>
                 <span
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${card.bg} ${card.color}`}
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${card.bg} ${card.color}`}
                 >
-                  <Icon size={21} strokeWidth={2.5} />
+                  <Icon size={16} strokeWidth={2.5} />
                 </span>
               </div>
               <p
-                className={`relative z-10 mt-4 flex items-center gap-1.5 text-sm font-bold ${card.color}`}
+                className={`relative z-10 mt-1 flex items-center gap-1.5 text-[10px] font-bold ${card.color}`}
               >
                 <div className={`h-1.5 w-1.5 rounded-full bg-current`} />
                 {card.meta}

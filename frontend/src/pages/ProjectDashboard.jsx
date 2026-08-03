@@ -95,7 +95,7 @@ export default function ProjectDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3">
         {[
           [
             "Overall Progress",
@@ -123,16 +123,14 @@ export default function ProjectDashboard() {
         ].map(([label, value, color]) => (
           <div
             key={label}
-            className="flex min-h-[116px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+            className="flex h-full flex-col justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm"
           >
-            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-500">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
               {label}
-            </p>
-            <p
-              className={`mt-4 break-words text-2xl font-extrabold leading-tight ${color}`}
-            >
+            </span>
+            <span className={`text-[22px] font-black leading-none tracking-tight ${color}`}>
               {value}
-            </p>
+            </span>
           </div>
         ))}
       </div>

@@ -95,23 +95,23 @@ export default function ExecutiveDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-7">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
             <div
               key={kpi.label}
-              className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+              className="flex h-full flex-col justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              <div className="flex items-start justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
                   {kpi.label}
                 </span>
-                <Icon className={kpi.color} size={18} />
+                <Icon className={kpi.color} size={16} />
               </div>
-              <p className={`mt-3 text-3xl font-extrabold ${kpi.color}`}>
+              <span className={`text-[22px] font-black leading-none tracking-tight ${kpi.color}`}>
                 {kpi.value}
-              </p>
+              </span>
             </div>
           );
         })}
