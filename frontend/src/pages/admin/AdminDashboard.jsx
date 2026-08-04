@@ -215,7 +215,7 @@ export default function AdminDashboard() {
         />
       </section>
 
-      <section className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (

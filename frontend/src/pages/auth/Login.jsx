@@ -66,13 +66,12 @@ export default function Login() {
 
         <div className="relative z-10 max-w-md">
           <h2 className="text-5xl font-black text-white leading-none mb-6 uppercase tracking-tighter">
-            Role-based
+            One Platform.
             <br />
-            access.
+            Every Role.
           </h2>
           <p className="text-zinc-400 text-lg font-medium leading-relaxed">
-            Super admins, company owners, project teams, site staff and clients
-            all land on the right dashboard.
+            Experience a unified construction management ecosystem. Connect your entire team with personalized workspaces designed for seamless collaboration and execution.
           </p>
         </div>
       </div>

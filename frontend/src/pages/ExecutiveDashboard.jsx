@@ -95,7 +95,7 @@ export default function ExecutiveDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
