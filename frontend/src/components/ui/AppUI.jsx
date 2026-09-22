@@ -107,7 +107,7 @@ export function Button({
 
 export function StatCard({ label, value, meta, icon: Icon, tone = "slate" }) {
   return (
-    <div className="flex min-h-[128px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="flex min-h-[100px] flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-extrabold uppercase tracking-wide text-slate-500">
           {label}
@@ -122,7 +122,7 @@ export function StatCard({ label, value, meta, icon: Icon, tone = "slate" }) {
       </div>
       <div>
         <p
-          className={`break-words text-2xl font-extrabold leading-tight ${toneText[tone]}`}
+          className={`break-words text-xl font-extrabold leading-tight ${toneText[tone]}`}
         >
           {value}
         </p>

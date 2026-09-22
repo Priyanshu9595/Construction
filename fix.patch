@@ -1,0 +1,160 @@
+diff --git a/frontend/src/pages/project/ProjectWorkers.jsx b/frontend/src/pages/project/ProjectWorkers.jsx
+index 63dfae8..cd8ca1e 100644
+--- a/frontend/src/pages/project/ProjectWorkers.jsx
++++ b/frontend/src/pages/project/ProjectWorkers.jsx
+@@ -8,6 +8,7 @@ import {
+   IndianRupee,
+   Wallet,
+   History,
++  AlertTriangle,
+ } from "lucide-react";
+ 
+ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+@@ -371,54 +372,74 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
+     deductions: 0,
+   });
+   const [isLoadingAttendance, setIsLoadingAttendance] = useState(false);
++  const [attendanceError, setAttendanceError] = useState("");
+   const [alreadyPaid, setAlreadyPaid] = useState(false);
+   const [paidAmount, setPaidAmount] = useState(0);
+ 
+   useEffect(() => {
++    const controller = new AbortController();
++
+     async function fetchAttendance() {
++      // The figures on screen belong to the previously selected date, so clear
++      // them until this date's summary arrives.
+       setIsLoadingAttendance(true);
++      setAttendanceError("");
+       setAlreadyPaid(false);
++      setPaidAmount(0);
++      setFormData((prev) => ({ ...prev, daysWorked: 0, grossSalary: 0 }));
+       try {
+         const token = localStorage.getItem("token");
+         const res = await fetch(
+           `${API_BASE_URL}/api/projects/${projectId}/workers/${worker._id}/attendance-summary?date=${formData.workDate}`,
+           {
+             headers: token ? { Authorization: `Bearer ${token}` } : {},
++            signal: controller.signal,
+           },
+         );
+-        if (res.ok) {
+-          const data = await res.json();
+-          if (data.alreadyPaid) {
+-            setAlreadyPaid(true);
+-            setPaidAmount(data.paidAmount || 0);
+-            setFormData((prev) => ({
+-              ...prev,
+-              daysWorked: data.daysWorked || 0,
+-              grossSalary: 0,
+-              deductions: 0,
+-            }));
+-          } else {
+-            const fetchedDays = data.daysWorked || 0;
+-            setFormData((prev) => ({
+-              ...prev,
+-              daysWorked: fetchedDays,
+-              grossSalary: fetchedDays * (worker.dailyWage || 0),
+-            }));
+-          }
++        if (!res.ok) throw new Error("Attendance summary request failed");
++        const data = await res.json();
++        // The work date changed while this request was in flight. The newer
++        // request owns the form now, so this response must not be applied.
++        if (controller.signal.aborted) return;
++        if (data.alreadyPaid) {
++          setAlreadyPaid(true);
++          setPaidAmount(data.paidAmount || 0);
++          setFormData((prev) => ({
++            ...prev,
++            daysWorked: data.daysWorked || 0,
++            grossSalary: 0,
++            deductions: 0,
++          }));
++        } else {
++          const fetchedDays = data.daysWorked || 0;
++          setFormData((prev) => ({
++            ...prev,
++            daysWorked: fetchedDays,
++            grossSalary: fetchedDays * (worker.dailyWage || 0),
++          }));
+         }
+       } catch (e) {
++        if (controller.signal.aborted) return;
+         console.error("Failed to fetch attendance summary", e);
++        setAttendanceError(
++          "Could not load attendance for this date. Reselect the date to try again.",
++        );
+       } finally {
+-        setIsLoadingAttendance(false);
++        if (!controller.signal.aborted) setIsLoadingAttendance(false);
+       }
+     }
++
+     fetchAttendance();
++    return () => controller.abort();
+   }, [formData.workDate, projectId, worker._id, worker.dailyWage]);
+ 
+   const netSalary = Math.max(
+     0,
+     Number(formData.grossSalary) - Number(formData.deductions),
+   );
++  // Until this date's summary has loaded we do not know whether it was already
++  // paid, so recording a payment has to wait.
++  const canSubmitPayment = !isLoadingAttendance && !attendanceError;
+ 
+   const mutation = useMutation({
+     mutationFn: async (data) => {
+@@ -487,6 +508,7 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
+               {isLoadingAttendance && (
+                 <Loader2
+                   size={14}
++                  aria-hidden="true"
+                   className="inline animate-spin ml-1 text-blue-500"
+                 />
+               )}
+@@ -538,6 +560,24 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
+             </label>
+           </div>
+ 
++          {attendanceError && (
++            <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">
++              <AlertTriangle size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
++              <span>{attendanceError}</span>
++            </div>
++          )}
++
++          {/* Announces whichever of the states below is currently on screen. */}
++          <p aria-live="polite" className="sr-only">
++            {isLoadingAttendance
++              ? "Loading attendance for the selected work date."
++              : attendanceError
++                ? attendanceError
++                : alreadyPaid
++                  ? `A payment of ${paidAmount} rupees was already recorded for this date.`
++                  : `Net payable amount ${netSalary} rupees.`}
++          </p>
++
+           {alreadyPaid ? (
+             <div className="bg-amber-50 rounded-xl p-4 flex flex-col gap-1 border border-amber-200">
+               <span className="font-bold text-amber-800">
+@@ -559,7 +599,7 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
+                 Net Payable Amount
+               </span>
+               <span className="text-xl font-extrabold text-emerald-700">
+-                ₹{netSalary}
++                {isLoadingAttendance ? "—" : `₹${netSalary}`}
+               </span>
+             </div>
+           )}
+@@ -589,8 +629,8 @@ function PayWorkerModal({ projectId, worker, onClose, onSuccess }) {
+           {!alreadyPaid && (
+             <button
+               type="submit"
+-              disabled={mutation.isPending}
+-              className="px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center gap-2"
++              disabled={mutation.isPending || !canSubmitPayment}
++              className="px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+             >
+               {mutation.isPending && (
+                 <Loader2 size={16} className="animate-spin" />

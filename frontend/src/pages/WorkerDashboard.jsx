@@ -11,6 +11,7 @@ import {
   ListTodo,
   Wallet,
   Building2,
+  Download,
 } from "lucide-react";
 import { formatINR } from "../lib/api";
 
@@ -58,8 +59,19 @@ export default function WorkerDashboard() {
     data.todayAttendance?.status === "present" &&
     !data.todayAttendance?.checkOutAt;
 
+  const downloadInvoice = (slip) => {
+    const invoiceContent = `BUILDING ERP - SALARY SLIP\n---------------------------------\nMonth: ${slip.month}\nPayment Date: ${slip.paymentDate ? new Date(slip.paymentDate).toLocaleDateString() : "-"}\nAmount: ${formatINR(slip.netSalary)}\nStatus: ${slip.paymentStatus.toUpperCase()}\n---------------------------------\nThis is a system generated invoice.`;
+    const blob = new Blob([invoiceContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Invoice_${slip.month.replace(/\s+/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-4 sm:p-6 pb-20">
+    <div className="mx-auto max-w-5xl h-full min-h-[85vh] flex flex-col gap-6 p-4 sm:p-6 pb-20">
 
 
       {/* Action Buttons */}
@@ -67,7 +79,7 @@ export default function WorkerDashboard() {
         <button
           onClick={() => checkIn.mutate()}
           disabled={isCheckedIn || checkIn.isPending}
-          className={`relative overflow-hidden rounded-2xl p-4 font-bold text-lg shadow-sm transition-all ${!isCheckedIn ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:shadow-blue-500/25 hover:-translate-y-1" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
+          className={`relative overflow-hidden rounded-xl px-4 py-3 font-semibold text-base shadow-sm transition-all ${!isCheckedIn ? "bg-gradient-to-b from-blue-500 to-blue-600 text-white hover:shadow-blue-500/25 hover:-translate-y-1" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
         >
           <div className="flex items-center justify-center gap-2">
             {checkIn.isPending ? (
@@ -86,7 +98,7 @@ export default function WorkerDashboard() {
         <button
           onClick={() => checkOut.mutate()}
           disabled={!isCheckedIn || checkOut.isPending}
-          className={`relative overflow-hidden rounded-2xl p-4 font-bold text-lg shadow-sm transition-all ${isCheckedIn ? "bg-gradient-to-b from-red-500 to-red-600 text-white hover:shadow-red-500/25 hover:-translate-y-1" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
+          className={`relative overflow-hidden rounded-xl px-4 py-3 font-semibold text-base shadow-sm transition-all ${isCheckedIn ? "bg-gradient-to-b from-red-500 to-red-600 text-white hover:shadow-red-500/25 hover:-translate-y-1" : "bg-slate-100 text-slate-400 cursor-not-allowed"}`}
         >
           <div className="flex items-center justify-center gap-2">
             {checkOut.isPending ? (
@@ -138,13 +150,13 @@ export default function WorkerDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
         {/* Assigned Tasks */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+        <div className="flex flex-col h-full gap-4">
+          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <ListTodo className="text-blue-600" /> My Assigned Tasks
           </h2>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-y-auto h-[185px] flex flex-col gap-px bg-slate-100 custom-scrollbar">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-y-auto flex-1 flex flex-col gap-px bg-slate-100 custom-scrollbar">
             {!data.assignedTasks || data.assignedTasks.length === 0 ? (
               <div className="bg-white p-8 text-center flex flex-col items-center justify-center">
                 <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-3">
@@ -158,14 +170,14 @@ export default function WorkerDashboard() {
                 </p>
               </div>
             ) : (
-              data.assignedTasks.map((t) => (
+              data.assignedTasks.slice(0, 2).map((t) => (
                 <div
                   key={t._id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-slate-50 transition-colors gap-4"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 transition-colors gap-4"
                 >
                   <div className="flex flex-col gap-4 flex-grow">
                     <div>
-                      <h4 className="font-bold text-slate-900 text-lg">
+                      <h4 className="font-bold text-slate-900 text-base">
                         {t.title}
                       </h4>
                       <p className="flex items-center gap-2 mt-1 text-sm font-medium text-slate-500">
@@ -275,13 +287,13 @@ export default function WorkerDashboard() {
         </div>
 
         {/* Salary Slips */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+        <div className="flex flex-col h-full gap-4">
+          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <Wallet className="text-emerald-600" /> Recent Salary Slips
           </h2>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-y-scroll h-[185px] flex flex-col gap-px bg-slate-100 custom-scrollbar">
+          <div className="overflow-y-auto flex-1 flex flex-col gap-3 custom-scrollbar pr-1 pb-2">
             {!data.salarySlips || data.salarySlips.length === 0 ? (
-              <div className="bg-white p-8 text-center flex flex-col items-center justify-center">
+              <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center">
                 <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-3">
                   <Wallet className="text-slate-300" size={32} />
                 </div>
@@ -290,14 +302,16 @@ export default function WorkerDashboard() {
                 </p>
               </div>
             ) : (
-              data.salarySlips.map((slip) => (
+              data.salarySlips.slice(0, 2).map((slip) => (
                 <div
                   key={slip._id}
-                  className="bg-white p-5 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4"
+                  onClick={() => downloadInvoice(slip)}
+                  className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-4 relative group"
                 >
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-lg">
+                    <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
                       {slip.month}
+                      <Download className="text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" size={16} />
                     </h3>
                     <p className="text-sm font-semibold text-slate-500 mt-1">
                       Paid on{" "}
