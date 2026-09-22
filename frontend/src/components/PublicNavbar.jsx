@@ -7,7 +7,7 @@ export default function PublicNavbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
           <img src="/logo-by.png" alt="Logo" className="w-8 h-8 rounded-md" />
-          <span className="text-2xl font-black text-white tracking-tighter uppercase">
+          <span className="text-2xl font-black text-white tracking-normal uppercase">
             Construction Hub
           </span>
         </Link>

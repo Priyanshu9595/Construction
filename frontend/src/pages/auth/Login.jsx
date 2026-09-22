@@ -58,14 +58,14 @@ export default function Login() {
         <div className="relative z-10 flex items-center gap-3">
           <Link
             to="/"
-            className="text-2xl font-black text-white tracking-tighter uppercase hover:text-[#ffd000] transition-colors"
+            className="text-2xl font-black text-white tracking-normal uppercase hover:text-[#ffd000] transition-colors"
           >
             Construction Hub
           </Link>
         </div>
 
         <div className="relative z-10 max-w-md">
-          <h2 className="text-5xl font-black text-white leading-none mb-6 uppercase tracking-tighter">
+          <h2 className="text-5xl font-black text-white leading-none mb-6 uppercase tracking-normal">
             One Platform.
             <br />
             Every Role.
@@ -81,13 +81,13 @@ export default function Login() {
           <div className="lg:hidden flex items-center gap-3 mb-10">
             <Link
               to="/"
-              className="text-xl font-black text-white tracking-tighter uppercase"
+              className="text-xl font-black text-white tracking-normal uppercase"
             >
               Construction Hub
             </Link>
           </div>
 
-          <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tighter">
+          <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-normal">
             Log in
           </h1>
           <p className="text-zinc-500 mb-8 font-medium">

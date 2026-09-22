@@ -9,9 +9,8 @@ export default function Home() {
       {/* Hero Section */}
       <section className="pt-40 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase mb-8 leading-[0.9] flex items-center flex-wrap gap-4 md:gap-6">
-            <img src="/logo-by.png" alt="Logo" className="w-16 h-16 md:w-24 md:h-24 rounded-2xl shadow-xl shrink-0" />
-            Construction Hub
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-normal uppercase mb-8 leading-[0.9]">
+            Build The Future
           </h1>
 
           <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mb-12 font-medium leading-relaxed">
@@ -44,7 +43,7 @@ export default function Home() {
         className="py-24 px-6 border-b border-zinc-800 bg-[#111111]"
       >
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter mb-16">
+          <h2 className="text-5xl md:text-6xl font-black text-white uppercase tracking-normal mb-16">
             Core Modules
           </h2>
 
@@ -182,7 +181,7 @@ export default function Home() {
       <section id="features" className="py-24 px-6 bg-[#161616]">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="lg:w-1/2">
-            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none mb-8">
+            <h2 className="text-5xl md:text-7xl font-black text-white tracking-normal leading-none mb-8">
               Platform
               <br />
               Benefits
@@ -212,7 +211,7 @@ export default function Home() {
       <section className="bg-[#0a0a0a] border-t border-zinc-800 py-20 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
-            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-normal uppercase leading-none">
               Ready to sync
               <br />
               projects?
@@ -235,7 +234,7 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 mb-16">
-            <div className="text-4xl font-black uppercase tracking-tighter flex items-center gap-4">
+            <div className="text-4xl font-black uppercase tracking-normal flex items-center gap-4">
               <img src="/logo-by.png" alt="Logo" className="w-10 h-10 rounded-lg shrink-0" />
               Construction Hub
             </div>
