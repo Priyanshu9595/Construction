@@ -285,6 +285,7 @@ export default function MainLayout() {
         className={`fixed inset-y-0 left-0 z-40 flex w-[280px] shrink-0 flex-col bg-[#0f172a] text-slate-400 shadow-2xl transition-transform duration-200 lg:static lg:z-20 lg:w-[260px] lg:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="p-6 pb-6 flex items-center gap-3">
+          <img src="/logo-by.png" alt="BuildFlow Logo" className="w-8 h-8 rounded-md shadow-sm" />
           <h1 className="text-xl font-bold text-white tracking-tight">
             BuildFlow
           </h1>

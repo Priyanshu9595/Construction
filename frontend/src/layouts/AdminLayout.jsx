@@ -105,6 +105,7 @@ export default function AdminLayout() {
         className={`fixed inset-y-0 left-0 z-40 flex w-[260px] shrink-0 flex-col bg-slate-900 text-slate-300 shadow-2xl shadow-slate-950/15 transition-transform duration-200 lg:static lg:z-20 lg:w-[240px] lg:translate-x-0 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="px-5 py-5 flex items-center gap-3">
+          <img src="/logo-by.png" alt="BuildFlow Logo" className="w-8 h-8 rounded-md shadow-sm" />
           <h1 className="text-lg font-bold text-white tracking-tight">
             BuildFlow
           </h1>

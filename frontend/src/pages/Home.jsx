@@ -9,7 +9,8 @@ export default function Home() {
       {/* Hero Section */}
       <section className="pt-40 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase mb-8 leading-[0.9]">
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase mb-8 leading-[0.9] flex items-center flex-wrap gap-4 md:gap-6">
+            <img src="/logo-by.png" alt="Logo" className="w-16 h-16 md:w-24 md:h-24 rounded-2xl shadow-xl shrink-0" />
             Construction Hub
           </h1>
 
@@ -234,7 +235,8 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 mb-16">
-            <div className="text-4xl font-black uppercase tracking-tighter">
+            <div className="text-4xl font-black uppercase tracking-tighter flex items-center gap-4">
+              <img src="/logo-by.png" alt="Logo" className="w-10 h-10 rounded-lg shrink-0" />
               Construction Hub
             </div>
 

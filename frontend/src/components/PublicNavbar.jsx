@@ -6,6 +6,7 @@ export default function PublicNavbar() {
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
+          <img src="/logo-by.png" alt="Logo" className="w-8 h-8 rounded-md" />
           <span className="text-2xl font-black text-white tracking-tighter uppercase">
             Construction Hub
           </span>
