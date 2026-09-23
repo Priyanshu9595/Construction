@@ -173,9 +173,6 @@ export default function AdminDashboard() {
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
               Super Admin Workspace
             </h1>
-            <p className="mt-1 text-sm font-semibold text-slate-500">
-              Monitor and manage the complete BuildFlow platform
-            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm">
